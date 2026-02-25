@@ -1,15 +1,8 @@
 import type { Metadata } from "next";
-import { Noto_Serif_KR } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import "./globals.css";
-
-const notoSerif = Noto_Serif_KR({
-  subsets: ["latin"],
-  weight: ["400", "700", "900"],
-  variable: "--font-noto-serif-kr",
-});
 
 export const metadata: Metadata = {
   title: "The Private Briefing",
@@ -22,10 +15,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${notoSerif.variable} font-sans antialiased`}
-      >
+    <html lang="ko" suppressHydrationWarning>
+      <body className="font-sans antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

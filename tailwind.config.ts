@@ -10,8 +10,8 @@ const config: Config = {
 	theme: {
 		extend: {
 			fontFamily: {
-				sans: ["var(--font-pretendard)"],
-				serif: ["var(--font-noto-serif-kr)"],
+				sans: ["var(--font-pretendard)", "sans-serif"],
+				serif: ["var(--font-pretendard)", "sans-serif"],
 			},
 			colors: {
 				brand: {
