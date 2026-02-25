@@ -15,7 +15,7 @@ export default function LoginPage({
                 className="absolute left-8 top-8 py-2 px-4 rounded-md no-underline text-foreground bg-btn-background hover:bg-btn-background-hover flex items-center group text-sm"
             >
                 <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                Back
+                돌아가기
             </Link>
 
             <form className="animate-in flex-1 flex flex-col w-full justify-center gap-2 text-foreground">
@@ -24,14 +24,14 @@ export default function LoginPage({
                     <div className="w-16 h-16 bg-brand-deepNavy dark:bg-brand-mutedBlue/20 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
                         <LockKeyhole className="w-8 h-8 text-white dark:text-brand-mutedBlue" />
                     </div>
-                    <h1 className="text-3xl font-serif font-bold text-foreground tracking-tight">Restricted Access</h1>
+                    <h1 className="text-3xl font-serif font-bold text-foreground tracking-tight">접근 제한됨</h1>
                     <p className="text-muted-foreground text-sm mt-3 text-balance">
-                        This area is restricted to the platform owner. Sign in to access the AI Editor and Content Management System.
+                        이 영역은 플랫폼 소유자 전용입니다. AI 에디터 및 콘텐츠 관리 시스템에 접근하려면 로그인하세요.
                     </p>
                 </div>
 
                 <label className="text-sm font-semibold" htmlFor="email">
-                    Email
+                    이메일
                 </label>
                 <input
                     className="rounded-xl px-4 py-3 bg-card border border-border/60 mb-6 placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand-mutedBlue/50 transition-all font-sans"
@@ -41,7 +41,7 @@ export default function LoginPage({
                 />
 
                 <label className="text-sm font-semibold" htmlFor="password">
-                    Password
+                    비밀번호
                 </label>
                 <input
                     className="rounded-xl px-4 py-3 bg-card border border-border/60 mb-8 placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand-mutedBlue/50 transition-all font-sans"
@@ -55,7 +55,7 @@ export default function LoginPage({
                     formAction={login}
                     className="bg-brand-deepNavy dark:bg-foreground text-white dark:text-background font-semibold rounded-xl px-4 py-3 text-foreground hover:opacity-90 transition-opacity mb-2"
                 >
-                    Sign In
+                    로그인
                 </button>
 
                 {searchParams?.message && (

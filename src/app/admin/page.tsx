@@ -4,17 +4,17 @@ import { logout } from '@/app/login/actions'
 
 export default function AdminDashboard() {
     const stats = [
-        { title: "Total Views", value: "124,592", change: "+12.5%", trend: "up", icon: BarChart3 },
-        { title: "Unique Readers", value: "45,231", change: "+8.2%", trend: "up", icon: Users },
-        { title: "Published Posts", value: "142", change: "+3 this week", trend: "neutral", icon: FileText },
-        { title: "Click Rate", value: "24.3%", change: "-1.1%", trend: "down", icon: MousePointerClick },
+        { title: "총 조회수", value: "124,592", change: "+12.5%", trend: "up", icon: BarChart3 },
+        { title: "순 방문자", value: "45,231", change: "+8.2%", trend: "up", icon: Users },
+        { title: "발행된 글", value: "142", change: "이번 주 +3", trend: "neutral", icon: FileText },
+        { title: "클릭률", value: "24.3%", change: "-1.1%", trend: "down", icon: MousePointerClick },
     ];
 
     const recentPosts = [
-        { id: 1, title: "The Evolution of AI in Personal Media", views: "12.4k", date: "Today", status: "Published" },
-        { id: 2, title: "Spatial Computing: Beyond the Goggles", views: "8.2k", date: "Yesterday", status: "Published" },
-        { id: 3, title: "Market Shifts in the Post-Interest Rate Hike Era", views: "15.1k", date: "2 days ago", status: "Published" },
-        { id: 4, title: "Draft: Web Design Aesthetics 2025", views: "-", date: "-", status: "Draft" },
+        { id: 1, title: "개인 미디어에서 AI의 진화: 스토리텔링의 새로운 시대", views: "12.4k", date: "오늘", status: "발행됨" },
+        { id: 2, title: "공간 컴퓨팅: 고글 그 너머로", views: "8.2k", date: "어제", status: "발행됨" },
+        { id: 3, title: "금리 인상 이후 시대의 시장 변화", views: "15.1k", date: "2일 전", status: "발행됨" },
+        { id: 4, title: "초안: 2025년 웹 디자인 미학", views: "-", date: "-", status: "초안" },
     ];
 
     return (
@@ -23,20 +23,20 @@ export default function AdminDashboard() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
                 <div>
-                    <h1 className="text-3xl font-bold font-serif text-foreground tracking-tight">Admin Dashboard</h1>
-                    <p className="text-muted-foreground mt-1 text-sm">Welcome back, Editor. Here is your platform overview.</p>
+                    <h1 className="text-3xl font-bold font-serif text-foreground tracking-tight">관리자 대시보드</h1>
+                    <p className="text-muted-foreground mt-1 text-sm">환영합니다, 에디터님. 플랫폼 요약 정보입니다.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <form action={logout}>
-                        <button className="p-2 border border-border/60 rounded-lg text-muted-foreground hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-500 transition-colors" title="Log out">
+                        <button className="p-2 border border-border/60 rounded-lg text-muted-foreground hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-500 transition-colors" title="로그아웃">
                             <LogOut className="w-5 h-5" />
                         </button>
                     </form>
-                    <Link href="/admin/settings" className="p-2 border border-border/60 rounded-lg text-muted-foreground hover:bg-accent transition-colors" title="Settings">
+                    <Link href="/admin/settings" className="p-2 border border-border/60 rounded-lg text-muted-foreground hover:bg-accent transition-colors" title="설정">
                         <Settings className="w-5 h-5" />
                     </Link>
                     <Link href="/admin/editor" className="inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors bg-brand-deepNavy dark:bg-foreground text-white dark:text-background hover:opacity-90 h-10 px-5 py-2 shadow-sm font-semibold">
-                        <Plus className="mr-2 h-4 w-4" /> New Post
+                        <Plus className="mr-2 h-4 w-4" /> 새 글 쓰기
                     </Link>
                 </div>
             </div>
@@ -73,8 +73,8 @@ export default function AdminDashboard() {
                 {/* Recent Posts List - spans 2 cols */}
                 <div className="lg:col-span-2 rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden">
                     <div className="p-6 border-b border-border/50 flex justify-between items-center">
-                        <h2 className="font-bold text-lg">Content Management</h2>
-                        <Link href="/admin/posts" className="text-sm text-brand-mutedBlue hover:underline font-medium">View all</Link>
+                        <h2 className="font-bold text-lg">콘텐츠 관리</h2>
+                        <Link href="/admin/posts" className="text-sm text-brand-mutedBlue hover:underline font-medium">모두 보기</Link>
                     </div>
                     <div className="divide-y divide-border/50">
                         {recentPosts.map((post) => (
@@ -82,7 +82,7 @@ export default function AdminDashboard() {
                                 <div className="space-y-1">
                                     <h3 className="font-semibold text-foreground group-hover:text-brand-mutedBlue transition-colors">{post.title}</h3>
                                     <div className="flex gap-3 text-xs text-muted-foreground">
-                                        <span className={post.status === 'Draft' ? 'text-orange-500' : 'text-green-500'}>
+                                        <span className={post.status === '초안' ? 'text-orange-500' : 'text-green-500'}>
                                             {post.status}
                                         </span>
                                         <span>•</span>
@@ -91,7 +91,7 @@ export default function AdminDashboard() {
                                 </div>
                                 <div className="text-right pl-4">
                                     <div className="font-medium text-foreground">{post.views}</div>
-                                    <div className="text-xs text-muted-foreground">Views</div>
+                                    <div className="text-xs text-muted-foreground">조회수</div>
                                 </div>
                             </div>
                         ))}
@@ -101,16 +101,16 @@ export default function AdminDashboard() {
                 {/* Quick Actions / AI Status - spans 1 col */}
                 <div className="space-y-6">
                     <div className="rounded-2xl border border-border/50 bg-card p-6 shadow-sm">
-                        <h2 className="font-bold text-lg mb-4">AI Writer API Status</h2>
+                        <h2 className="font-bold text-lg mb-4">AI 작가 API 상태</h2>
                         <div className="space-y-4">
                             <div className="flex justify-between items-center text-sm">
-                                <span className="text-muted-foreground">OpenAI Models</span>
+                                <span className="text-muted-foreground">OpenAI 모델</span>
                                 <span className="flex items-center text-green-500 font-medium">
-                                    <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span> Online
+                                    <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span> 온라인
                                 </span>
                             </div>
                             <div className="flex justify-between items-center text-sm">
-                                <span className="text-muted-foreground">Requests Today</span>
+                                <span className="text-muted-foreground">오늘의 요청</span>
                                 <span className="font-bold">24 / 1,000</span>
                             </div>
                             <div className="w-full bg-border/50 rounded-full h-2 mt-2">
@@ -124,10 +124,10 @@ export default function AdminDashboard() {
                             <Plus className="w-32 h-32" />
                         </div>
                         <div className="relative z-10">
-                            <h2 className="font-bold text-lg mb-2">Have a quick thought?</h2>
-                            <p className="text-sm text-gray-300 mb-6">Write a short brief and let AI expand it into a full post.</p>
+                            <h2 className="font-bold text-lg mb-2">짧은 영감이 떠오르셨나요?</h2>
+                            <p className="text-sm text-gray-300 mb-6">간단한 메모를 남기면 AI가 완성된 글로 확장시켜 줍니다.</p>
                             <Link href="/admin/editor?mode=ai-expand" className="inline-block w-full text-center rounded-lg text-sm font-semibold transition-colors bg-white text-brand-deepNavy hover:bg-gray-100 py-3">
-                                Open AI Editor
+                                AI 에디터 열기
                             </Link>
                         </div>
                     </div>

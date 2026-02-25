@@ -56,18 +56,18 @@ export default function AIEditor() {
             <div className="flex items-center justify-between mb-8 pb-4 border-b border-border/60">
                 <Link href="/admin" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group">
                     <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-                    Back to Dashboard
+                    대시보드로 돌아가기
                 </Link>
                 <div className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground font-medium mr-2">Draft saved at 10:42 AM</span>
-                    <button className="p-2 border border-border/60 rounded-lg text-muted-foreground hover:bg-accent transition-colors" aria-label="Preview">
+                    <span className="text-xs text-muted-foreground font-medium mr-2">오전 10:42분 초안 저장됨</span>
+                    <button className="p-2 border border-border/60 rounded-lg text-muted-foreground hover:bg-accent transition-colors" aria-label="미리보기">
                         <Eye className="w-4 h-4" />
                     </button>
                     <button className="px-4 py-2 border border-border/60 rounded-lg text-sm font-medium hover:bg-accent transition-colors flex items-center">
-                        <Save className="w-4 h-4 mr-2" /> Save Draft
+                        <Save className="w-4 h-4 mr-2" /> 초안 저장
                     </button>
                     <button className="px-5 py-2 bg-brand-deepNavy dark:bg-foreground text-white dark:text-background rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity flex items-center">
-                        <Send className="w-4 h-4 mr-2" /> Publish
+                        <Send className="w-4 h-4 mr-2" /> 발행하기
                     </button>
                 </div>
             </div>
@@ -79,7 +79,7 @@ export default function AIEditor() {
                 <div className="flex-1 flex flex-col max-w-4xl w-full">
                     <input
                         type="text"
-                        placeholder="Article Title..."
+                        placeholder="기사 제목..."
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         className="w-full text-4xl md:text-5xl font-serif font-bold bg-transparent border-none outline-none placeholder:text-muted focus:ring-0 mb-6 text-foreground"
@@ -94,7 +94,7 @@ export default function AIEditor() {
                                 }`}
                         >
                             <Mic className={`w-4 h-4 ${isRecording ? 'animate-pulse' : ''}`} />
-                            {isRecording ? 'Listening...' : 'Dictate (STT)'}
+                            {isRecording ? '듣는 중...' : '음성 입력 (STT)'}
                         </button>
                         <div className="w-px h-6 bg-border mx-1"></div>
                         <button
@@ -103,7 +103,7 @@ export default function AIEditor() {
                             className="p-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:bg-brand-mutedBlue/10 text-brand-mutedBlue transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <Sparkles className={`w-4 h-4 ${isAiProcessing ? 'animate-spin' : ''}`} />
-                            Auto-Format
+                            자동 포맷팅
                         </button>
                         <button className="p-2.5 rounded-lg hover:bg-accent text-muted-foreground transition-colors">
                             <MoreHorizontal className="w-4 h-4" />
@@ -113,7 +113,7 @@ export default function AIEditor() {
                     <textarea
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        placeholder="Start writing, or use the dictator to transcribe your thoughts..."
+                        placeholder="글을 작성하거나, 음성 입력을 통해 생각을 기록해 보세요..."
                         className="w-full flex-1 resize-none bg-transparent border-none outline-none text-lg md:text-xl font-sans font-light leading-relaxed placeholder:text-muted-foreground/50 focus:ring-0 text-foreground custom-scrollbar"
                     />
                 </div>
@@ -125,48 +125,48 @@ export default function AIEditor() {
                     <div className="bg-gradient-to-br from-brand-mutedBlue/5 to-transparent border border-brand-mutedBlue/20 rounded-[1.5rem] p-6 shadow-sm">
                         <div className="flex items-center gap-2 mb-4">
                             <Sparkles className="h-5 w-5 text-brand-mutedBlue" />
-                            <h3 className="font-bold text-foreground">AI Style Editor</h3>
+                            <h3 className="font-bold text-foreground">AI 문체 보정기</h3>
                         </div>
 
                         <p className="text-sm text-muted-foreground mb-4">
-                            Select a tone to instantly rewrite your current draft.
+                            원하시는 어조를 선택하면 본문 초안을 즉시 다시 작성해 드립니다.
                         </p>
 
                         <div className="grid grid-cols-2 gap-2">
                             <button onClick={() => handleToneChange('tone_journalistic')} className="px-3 py-2 text-xs font-semibold rounded-lg border border-border/60 bg-card hover:bg-accent hover:border-brand-mutedBlue/30 text-foreground transition-all">
-                                Journalistic
+                                저널리즘
                             </button>
                             <button onClick={() => handleToneChange('tone_editorial')} className="px-3 py-2 text-xs font-semibold rounded-lg border border-border/60 bg-card hover:bg-accent hover:border-brand-mutedBlue/30 text-foreground transition-all">
-                                Editorial
+                                사설
                             </button>
                             <button onClick={() => handleToneChange('tone_casual')} className="px-3 py-2 text-xs font-semibold rounded-lg border border-border/60 bg-card hover:bg-accent hover:border-brand-mutedBlue/30 text-foreground transition-all">
-                                Casual
+                                캐주얼
                             </button>
                             <button onClick={() => handleToneChange('tone_academic')} className="px-3 py-2 text-xs font-semibold rounded-lg border border-border/60 bg-card hover:bg-accent hover:border-brand-mutedBlue/30 text-foreground transition-all">
-                                Academic
+                                논문/학술
                             </button>
                         </div>
 
                         <button disabled={isAiProcessing || !content} onClick={() => handleAiAssist()} className="w-full mt-4 py-2.5 bg-brand-deepNavy dark:bg-brand-mutedBlue/30 text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50">
-                            Apply Tone {isAiProcessing && '...'}
+                            문체 적용하기 {isAiProcessing && '...'}
                         </button>
                     </div>
 
                     {/* AI Utilities */}
                     <div className="border border-border/50 bg-card rounded-[1.5rem] p-6 shadow-sm flex-1">
-                        <h3 className="font-bold text-foreground mb-4">Utilities</h3>
+                        <h3 className="font-bold text-foreground mb-4">비서 기능</h3>
                         <div className="space-y-3">
                             <button className="w-full p-3 flex flex-col items-start gap-1 rounded-xl hover:bg-accent border border-transparent hover:border-border/60 transition-all text-left group">
-                                <span className="text-sm font-semibold text-foreground group-hover:text-brand-mutedBlue">Generate Summary</span>
-                                <span className="text-xs text-muted-foreground">Create the 3-line reader summary</span>
+                                <span className="text-sm font-semibold text-foreground group-hover:text-brand-mutedBlue">요약본 생성하기</span>
+                                <span className="text-xs text-muted-foreground">독자를 위해 본문 상단 3줄 요약</span>
                             </button>
                             <button className="w-full p-3 flex flex-col items-start gap-1 rounded-xl hover:bg-accent border border-transparent hover:border-border/60 transition-all text-left group">
-                                <span className="text-sm font-semibold text-foreground group-hover:text-brand-mutedBlue">Find Data Points</span>
-                                <span className="text-xs text-muted-foreground">Search web for stats to support text</span>
+                                <span className="text-sm font-semibold text-foreground group-hover:text-brand-mutedBlue">데이터 포인트 검색</span>
+                                <span className="text-xs text-muted-foreground">글을 뒷받침할 객관적 통계 웹 검색</span>
                             </button>
                             <button className="w-full p-3 flex flex-col items-start gap-1 rounded-xl hover:bg-accent border border-transparent hover:border-border/60 transition-all text-left group">
-                                <span className="text-sm font-semibold text-foreground group-hover:text-brand-mutedBlue">Suggest Title</span>
-                                <span className="text-xs text-muted-foreground">Generate 5 engaging headline options</span>
+                                <span className="text-sm font-semibold text-foreground group-hover:text-brand-mutedBlue">제목 추천받기</span>
+                                <span className="text-xs text-muted-foreground">시선을 끄는 매력적인 헤드라인 5개 추천</span>
                             </button>
                         </div>
                     </div>
