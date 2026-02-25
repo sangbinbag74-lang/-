@@ -9,7 +9,7 @@ export default function Home() {
           좋은 아침입니다.
         </h1>
         <p className="text-muted-foreground text-lg">
-          오늘의 프라이빗 브리핑을 전해드립니다.
+          육군 참모차장의 시선으로 그리는 익산의 새로운 비전
         </p>
       </section>
 

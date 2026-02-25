@@ -36,7 +36,7 @@ export default function LoginPage({
                 <input
                     className="rounded-xl px-4 py-3 bg-card border border-border/60 mb-6 placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand-mutedBlue/50 transition-all font-sans"
                     name="email"
-                    placeholder="editor@privatebriefing.com"
+                    placeholder="editor@forwardiksan.com"
                     required
                 />
 

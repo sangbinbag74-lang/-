@@ -5,8 +5,8 @@ import { Footer } from "@/components/layout/footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "The Private Briefing",
-  description: "나만의 언론 - AI 기반 차세대 퍼스널 미디어",
+  title: "포워드 익산 (Forward Iksan)",
+  description: "국가의 참모에서, 익산 시민의 든든한 참모로.",
 };
 
 export default function RootLayout({
