@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { BarChart3, Users, FileText, MousePointerClick, Plus, Settings, ArrowUpRight } from "lucide-react";
+import { BarChart3, Users, FileText, MousePointerClick, Plus, Settings, ArrowUpRight, LogOut } from "lucide-react";
+import { logout } from '@/app/login/actions'
 
 export default function AdminDashboard() {
     const stats = [
@@ -26,7 +27,12 @@ export default function AdminDashboard() {
                     <p className="text-muted-foreground mt-1 text-sm">Welcome back, Editor. Here is your platform overview.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Link href="/admin/settings" className="p-2 border border-border/60 rounded-lg text-muted-foreground hover:bg-accent transition-colors">
+                    <form action={logout}>
+                        <button className="p-2 border border-border/60 rounded-lg text-muted-foreground hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-500 transition-colors" title="Log out">
+                            <LogOut className="w-5 h-5" />
+                        </button>
+                    </form>
+                    <Link href="/admin/settings" className="p-2 border border-border/60 rounded-lg text-muted-foreground hover:bg-accent transition-colors" title="Settings">
                         <Settings className="w-5 h-5" />
                     </Link>
                     <Link href="/admin/editor" className="inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors bg-brand-deepNavy dark:bg-foreground text-white dark:text-background hover:opacity-90 h-10 px-5 py-2 shadow-sm font-semibold">
@@ -50,7 +56,7 @@ export default function AdminDashboard() {
                             <div>
                                 <h3 className="text-3xl font-bold text-foreground mb-1">{stat.value}</h3>
                                 <p className={`text-xs font-medium flex items-center ${stat.trend === 'up' ? 'text-green-600 dark:text-green-400' :
-                                        stat.trend === 'down' ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'
+                                    stat.trend === 'down' ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'
                                     }`}>
                                     {stat.trend === 'up' && <ArrowUpRight className="mr-1 h-3 w-3" />}
                                     {stat.change}
