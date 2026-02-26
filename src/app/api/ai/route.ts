@@ -8,24 +8,60 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Text is required' }, { status: 400 });
         }
 
-        // MOCK RESPONSE FOR DEMO PURPOSES
-        await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
-
-        let mockResult = "";
-        if (mode === 'summary') {
-            mockResult = JSON.stringify([
-                "This is the first generated summary point about the text.",
-                "Here is the second compelling insight extracted by the AI.",
-                "Finally, the third point concludes the main argument effectively."
-            ]);
-        } else {
-            mockResult = `[Mock ${mode || 'edited'} version]\n\n${text}\n\n(Note: This is a placeholder since no real OpenAI API key was provided. In production, this would be the actual AI-generated text.)`;
+        const apiKey = process.env.OPENAI_API_KEY;
+        if (!apiKey) {
+            return NextResponse.json({ error: 'OpenAI API Error: API 키가 설정되지 않았습니다.' }, { status: 500 });
         }
 
-        return NextResponse.json({ result: mockResult });
+        let systemPrompt = "당신은 전문적이고 유능한 수석 에디터입니다.";
 
-    } catch (error) {
+        switch (mode) {
+            case 'tone_journalistic':
+                systemPrompt += " 제공된 텍스트를 깊이 있고 신뢰감 있는 저널리즘(기사) 어조로 변경하세요.";
+                break;
+            case 'summarize':
+                systemPrompt += " 제공된 텍스트를 독자가 가장 흥미로워할 3줄 요약 부울릿 포인트(1,2,3)로 핵심만 정리하세요.";
+                break;
+            case 'search_data':
+                systemPrompt += " 제공된 텍스트의 맥락에 어울리는 구체적인 최신 통계 데이터나 객관적인 사실 1~2가지를 덧붙여서 글을 더욱 풍부하게 만들어주세요.";
+                break;
+            case 'suggest_title':
+                systemPrompt += " 이 글 내용에 어울리는 가장 시선을 끌 수 있는 매력적인 제목 5가지를 번호 매겨서 추천해 주세요.";
+                break;
+            default:
+                systemPrompt += " 이 글의 의도를 파악하여 문맥을 매끄럽게 포맷팅하고 단락을 세련되게 구조화하세요.";
+        }
+
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: "gpt-4o-mini",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: text }
+                ],
+                temperature: 0.7,
+                max_tokens: 1500,
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('OpenAI Error Details:', errorData);
+            throw new Error(errorData.error?.message || 'Failed to generate content');
+        }
+
+        const data = await response.json();
+        const result = data.choices[0].message.content;
+
+        return NextResponse.json({ result });
+
+    } catch (error: any) {
         console.error('OpenAI API error:', error);
-        return NextResponse.json({ error: 'Failed to process AI request' }, { status: 500 });
+        return NextResponse.json({ error: error.message || 'Failed to process AI request' }, { status: 500 });
     }
 }

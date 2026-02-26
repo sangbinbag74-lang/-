@@ -36,7 +36,7 @@ export async function savePost(data: { title: string; content: string; status: '
 
     if (error) {
         console.error('Save post error:', error)
-        return { error: '글 저장에 실패했습니다.' }
+        return { error: `글 저장 실패: ${error.message}` }
     }
 
     // 5. Revalidate cache and redirect
