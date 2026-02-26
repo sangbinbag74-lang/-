@@ -5,7 +5,7 @@ import { ArrowLeft, LockKeyhole } from 'lucide-react';
 export default function LoginPage({
     searchParams,
 }: {
-    searchParams: { message: string }
+    searchParams: { message: string, success?: string }
 }) {
     return (
         <div className="flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2 min-h-[calc(100vh-140px)] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
