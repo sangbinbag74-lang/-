@@ -83,8 +83,22 @@ export default async function PostPage({ params }: { params: { slug: string } })
             )}
 
             {/* Body Content */}
-            <div className="space-y-8 text-lg md:text-xl text-foreground/90 leading-loose font-sans font-light whitespace-pre-wrap">
-                {post.content}
+            <div className="text-lg md:text-xl text-foreground/90 leading-loose font-sans font-light whitespace-pre-wrap break-words">
+                {post.content.split(/(!\[[^\]]*\]\([^)]+\))/g).map((part: string, index: number) => {
+                    const imgMatch = part.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+                    if (imgMatch) {
+                        return (
+                            <img
+                                key={index}
+                                src={imgMatch[2]}
+                                alt={imgMatch[1]}
+                                className="w-full h-auto max-h-[70vh] object-contain rounded-2xl shadow-sm my-8 bg-black/5 dark:bg-white/5"
+                                loading="lazy"
+                            />
+                        );
+                    }
+                    return <span key={index}>{part}</span>;
+                })}
             </div>
 
         </article>
