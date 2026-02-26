@@ -1,6 +1,21 @@
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/server';
 
-export default function Home() {
+export default async function Home() {
+  const supabase = createClient();
+
+  const { data: posts } = await supabase
+    .from('posts')
+    .select('*')
+    .in('status', ['published', '발행됨'])
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  const mainPost = posts?.[0];
+  const shorts = posts?.slice(1, 5) || [];
+  const standardPost1 = posts?.[5] || posts?.[1];
+  const standardPost2 = posts?.[6] || posts?.[2];
+
   return (
     <div className="container mx-auto max-w-screen-xl px-4 lg:px-8 py-8 md:py-12 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Date & Greeting */}
@@ -16,27 +31,32 @@ export default function Home() {
       {/* Bento Grid */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[250px]">
         {/* Main Feature - 2x2 */}
-        <Link href="/posts/1" className="group col-span-1 md:col-span-2 row-span-2 rounded-[2rem] overflow-hidden relative border border-border/50 bg-card text-card-foreground shadow-sm hover:shadow-md transition-all">
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10 transition-opacity group-hover:opacity-90"></div>
+        {mainPost ? (
+          <Link href={`/posts/${mainPost.slug}`} className="group col-span-1 md:col-span-2 row-span-2 rounded-[2rem] overflow-hidden relative border border-border/50 bg-card text-card-foreground shadow-sm hover:shadow-md transition-all">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10 transition-opacity group-hover:opacity-90"></div>
 
-          {/* Decorative background representing an image */}
-          <div className="absolute inset-0 bg-slate-200 dark:bg-slate-800 group-hover:scale-105 transition-transform duration-700">
-            {/* Abstract shapes as placeholder image */}
-            <div className="absolute -top-24 -right-24 w-96 h-96 bg-brand-mutedBlue/30 rounded-full blur-3xl mix-blend-multiply dark:mix-blend-screen"></div>
-            <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-brand-deepNavy/20 rounded-full blur-2xl mix-blend-multiply dark:mix-blend-screen"></div>
-          </div>
+            {/* Decorative background representing an image */}
+            <div className="absolute inset-0 bg-slate-200 dark:bg-slate-800 group-hover:scale-105 transition-transform duration-700">
+              <div className="absolute -top-24 -right-24 w-96 h-96 bg-brand-mutedBlue/30 rounded-full blur-3xl mix-blend-multiply dark:mix-blend-screen"></div>
+              <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-brand-deepNavy/20 rounded-full blur-2xl mix-blend-multiply dark:mix-blend-screen"></div>
+            </div>
 
-          <div className="absolute bottom-0 left-0 p-8 md:p-10 z-20 space-y-4 w-full md:w-4/5">
-            <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md border border-white/10">인사이트</span>
-            <h2 className="text-2xl md:text-4xl font-serif font-bold text-white group-hover:text-white/90 transition-colors drop-shadow-sm">
-              개인 미디어에서 AI의 진화: 스토리텔링의 새로운 시대
-            </h2>
-            <p className="text-gray-200 line-clamp-2 md:text-lg font-light leading-relaxed">
-              인공지능이 계속 발전함에 따라, 개인이 뉴스를 소비하고 창작하는 방식에 거대한 변화가 일어나고 있습니다. 기존의 경계가 무너지고 있습니다.
-            </p>
-            <div className="text-sm text-gray-300 font-medium">에디터 작성 • 읽는 시간 5분</div>
+            <div className="absolute bottom-0 left-0 p-8 md:p-10 z-20 space-y-4 w-full md:w-4/5">
+              <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md border border-white/10">최신 인사이트</span>
+              <h2 className="text-2xl md:text-4xl font-serif font-bold text-white group-hover:text-white/90 transition-colors drop-shadow-sm">
+                {mainPost.title}
+              </h2>
+              <p className="text-gray-200 line-clamp-2 md:text-lg font-light leading-relaxed">
+                {mainPost.summary || mainPost.content.substring(0, 150)}
+              </p>
+              <div className="text-sm text-gray-300 font-medium">에디터 작성 • {new Date(mainPost.created_at).toLocaleDateString('ko-KR')}</div>
+            </div>
+          </Link>
+        ) : (
+          <div className="group col-span-1 md:col-span-2 row-span-2 rounded-[2rem] border border-border/50 bg-card p-10 flex items-center justify-center text-muted-foreground">
+            아직 발행된 첫 번째 글이 없습니다.
           </div>
-        </Link>
+        )}
 
         {/* Short Thought - 1x2 */}
         <div className="col-span-1 row-span-2 rounded-[2rem] border border-border/50 bg-card p-8 shadow-sm flex flex-col">
@@ -45,44 +65,50 @@ export default function Home() {
             <Link href="/shorts" className="text-brand-mutedBlue text-sm hover:underline font-medium">모두 보기</Link>
           </div>
           <div className="flex-1 overflow-y-auto space-y-5 pr-2 custom-scrollbar">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="group cursor-pointer space-y-2 pb-5 border-b border-border/40 last:border-0">
-                <p className="text-sm text-foreground/80 group-hover:text-foreground transition-colors leading-relaxed">
-                  &quot;디지털 시대의 가장 중요한 자산은 데이터가 아니라 주의력입니다. 이를 어떻게 선별하느냐가 우리의 지성을 정의합니다.&quot;
+            {shorts.length > 0 ? shorts.map((post) => (
+              <Link href={`/posts/${post.slug}`} key={post.id} className="block group cursor-pointer space-y-2 pb-5 border-b border-border/40 last:border-0">
+                <p className="text-sm text-foreground/80 group-hover:text-foreground transition-colors leading-relaxed line-clamp-3">
+                  &quot;{post.summary || post.content.substring(0, 100)}...&quot;
                 </p>
-                <div className="text-xs text-muted-foreground font-medium">2시간 전</div>
-              </div>
-            ))}
+                <div className="text-xs text-muted-foreground font-medium">{new Date(post.created_at).toLocaleDateString('ko-KR')}</div>
+              </Link>
+            )) : (
+              <div className="text-sm text-muted-foreground pt-4">최근 글이 없습니다.</div>
+            )}
           </div>
         </div>
 
         {/* Standard Card 1 - 1x1 */}
-        <Link href="/posts/2" className="group col-span-1 row-span-1 rounded-[2rem] border border-border/50 bg-card p-8 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-          <div className="space-y-3">
-            <span className="text-xs font-semibold text-brand-mutedBlue tracking-wide uppercase">기술 & 사회</span>
-            <h3 className="font-bold text-xl font-serif leading-tight group-hover:text-brand-mutedBlue transition-colors text-foreground">
-              공간 컴퓨팅: 고글 그 너머로
-            </h3>
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              인터페이스의 미래가 단순히 헤드셋을 쓰는 것이 아니라, 우리의 물리적 환경을 어떻게 재정의하는지에 대하여.
-            </p>
-          </div>
-          <div className="text-xs text-muted-foreground mt-4 font-medium">어제 • 읽는 시간 3분</div>
-        </Link>
+        {standardPost1 && (
+          <Link href={`/posts/${standardPost1.slug}`} className="group col-span-1 row-span-1 rounded-[2rem] border border-border/50 bg-card p-8 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+            <div className="space-y-3">
+              <span className="text-xs font-semibold text-brand-mutedBlue tracking-wide uppercase">인사이트</span>
+              <h3 className="font-bold text-xl font-serif leading-tight group-hover:text-brand-mutedBlue transition-colors text-foreground line-clamp-2">
+                {standardPost1.title}
+              </h3>
+              <p className="text-sm text-muted-foreground line-clamp-2">
+                {standardPost1.summary || standardPost1.content.substring(0, 100)}
+              </p>
+            </div>
+            <div className="text-xs text-muted-foreground mt-4 font-medium">{new Date(standardPost1.created_at).toLocaleDateString('ko-KR')}</div>
+          </Link>
+        )}
 
         {/* Standard Card 2 (High Contrast) - 1x1 */}
-        <Link href="/posts/3" className="group col-span-1 row-span-1 rounded-[2rem] border border-transparent p-8 shadow-sm hover:shadow-md transition-all flex flex-col justify-between bg-brand-charcoal text-white dark:bg-card dark:border-border/50 dark:text-card-foreground">
-          <div className="space-y-3">
-            <span className="text-xs font-semibold text-gray-400 dark:text-brand-mutedBlue tracking-wide uppercase">경제</span>
-            <h3 className="font-bold text-xl font-serif leading-tight group-hover:text-gray-200 dark:group-hover:text-brand-mutedBlue transition-colors">
-              금리 인상 이후 시대의 시장 변화
-            </h3>
-            <p className="text-sm text-gray-300 dark:text-muted-foreground line-clamp-2">
-              지속적인 인플레이션 압력이 벤처 캐피탈을 어떻게 재편하고 있는지에 대한 심층 분석.
-            </p>
-          </div>
-          <div className="text-xs text-gray-400 dark:text-muted-foreground mt-4 font-medium">2024년 10월 24일 • 읽는 시간 7분</div>
-        </Link>
+        {standardPost2 && (
+          <Link href={`/posts/${standardPost2.slug}`} className="group col-span-1 row-span-1 rounded-[2rem] border border-transparent p-8 shadow-sm hover:shadow-md transition-all flex flex-col justify-between bg-brand-charcoal text-white dark:bg-card dark:border-border/50 dark:text-card-foreground">
+            <div className="space-y-3">
+              <span className="text-xs font-semibold text-gray-400 dark:text-brand-mutedBlue tracking-wide uppercase">인사이트</span>
+              <h3 className="font-bold text-xl font-serif leading-tight group-hover:text-gray-200 dark:group-hover:text-brand-mutedBlue transition-colors line-clamp-2">
+                {standardPost2.title}
+              </h3>
+              <p className="text-sm text-gray-300 dark:text-muted-foreground line-clamp-2">
+                {standardPost2.summary || standardPost2.content.substring(0, 100)}
+              </p>
+            </div>
+            <div className="text-xs text-gray-400 dark:text-muted-foreground mt-4 font-medium">{new Date(standardPost2.created_at).toLocaleDateString('ko-KR')}</div>
+          </Link>
+        )}
       </section>
     </div>
   );

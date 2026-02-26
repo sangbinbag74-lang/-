@@ -178,16 +178,28 @@ export default function AIEditor() {
                     <div className="border border-border/50 bg-card rounded-[1.5rem] p-6 shadow-sm flex-1">
                         <h3 className="font-bold text-foreground mb-4">비서 기능</h3>
                         <div className="space-y-3">
-                            <button className="w-full p-3 flex flex-col items-start gap-1 rounded-xl hover:bg-accent border border-transparent hover:border-border/60 transition-all text-left group">
+                            <button
+                                disabled={isAiProcessing || !content}
+                                onClick={() => handleToneChange('summarize')}
+                                className="w-full p-3 flex flex-col items-start gap-1 rounded-xl hover:bg-accent border border-transparent hover:border-border/60 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
                                 <span className="text-sm font-semibold text-foreground group-hover:text-brand-mutedBlue">요약본 생성하기</span>
                                 <span className="text-xs text-muted-foreground">독자를 위해 본문 상단 3줄 요약</span>
                             </button>
-                            <button className="w-full p-3 flex flex-col items-start gap-1 rounded-xl hover:bg-accent border border-transparent hover:border-border/60 transition-all text-left group">
+                            <button
+                                disabled={isAiProcessing || !content}
+                                onClick={() => handleToneChange('search_data')}
+                                className="w-full p-3 flex flex-col items-start gap-1 rounded-xl hover:bg-accent border border-transparent hover:border-border/60 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
                                 <span className="text-sm font-semibold text-foreground group-hover:text-brand-mutedBlue">데이터 포인트 검색</span>
-                                <span className="text-xs text-muted-foreground">글을 뒷받침할 객관적 통계 웹 검색</span>
+                                <span className="text-xs text-muted-foreground">글을 뒷받침할 객관적 통계 추가</span>
                             </button>
-                            <button className="w-full p-3 flex flex-col items-start gap-1 rounded-xl hover:bg-accent border border-transparent hover:border-border/60 transition-all text-left group">
-                                <span className="text-sm font-semibold text-foreground group-hover:text-brand-mutedBlue">제목 추천받기</span>
+                            <button
+                                disabled={isAiProcessing || !content}
+                                onClick={() => handleToneChange('suggest_title')}
+                                className="w-full p-3 flex flex-col items-start gap-1 rounded-xl hover:bg-accent border border-transparent hover:border-border/60 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <span className="text-sm font-semibold text-foreground group-hover:text-brand-mutedBlue">제목 풀 제안받기</span>
                                 <span className="text-xs text-muted-foreground">시선을 끄는 매력적인 헤드라인 5개 추천</span>
                             </button>
                         </div>
