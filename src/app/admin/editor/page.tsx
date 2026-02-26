@@ -1,12 +1,17 @@
 "use client";
 
-import { useState, useTransition, useRef } from "react";
+import { useState, useTransition, useRef, useEffect, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Mic, Sparkles, Send, Save, Eye, MoreHorizontal, ImageIcon } from "lucide-react";
 import { savePost } from "./actions";
 import { supabase } from '@/lib/supabase/client';
 
-export default function AIEditor() {
+function EditorContent() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const postId = searchParams.get('id');
+
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [isRecording, setIsRecording] = useState(false);
@@ -15,13 +20,33 @@ export default function AIEditor() {
     const [isPending, startTransition] = useTransition();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    useEffect(() => {
+        if (postId) {
+            const fetchPost = async () => {
+                const { data } = await supabase.from('posts').select('*').eq('id', postId).single();
+                if (data) {
+                    setTitle(data.title || "");
+                    setContent(data.content || "");
+                }
+            };
+            fetchPost();
+        }
+    }, [postId]);
+
     const handleSave = (status: 'draft' | 'published') => {
         if (!title && !content) return;
 
         startTransition(async () => {
-            const result = await savePost({ title, content, status });
+            const result = await savePost({ id: postId || undefined, title, content, status });
             if (result?.error) {
                 alert(result.error);
+            } else if (result?.success) {
+                alert(status === 'published' ? '발행되었습니다.' : '초안이 저장되었습니다.');
+                if (status === 'published') {
+                    router.push('/admin/posts');
+                } else if (!postId && result.id) {
+                    router.replace(`/admin/editor?id=${result.id}`);
+                }
             }
         });
     };
@@ -283,5 +308,13 @@ export default function AIEditor() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function AIEditor() {
+    return (
+        <Suspense fallback={<div className="p-8 text-center text-muted-foreground animate-pulse">에디터 불러오는 중...</div>}>
+            <EditorContent />
+        </Suspense>
     );
 }
