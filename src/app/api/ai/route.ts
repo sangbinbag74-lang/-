@@ -28,6 +28,12 @@ export async function POST(req: Request) {
             case 'suggest_title':
                 systemPrompt += " 이 글 내용에 어울리는 가장 시선을 끌 수 있는 매력적인 제목 5가지를 번호 매겨서 추천해 주세요.";
                 break;
+            case 'expand':
+                systemPrompt += " 제공된 텍스트의 논리와 맥락을 바탕으로 구체적인 예시, 부연 설명, 깊이 있는 통찰을 추가하여 글의 전체 분량을 2배 정도로 풍부하게 확장해 주세요.";
+                break;
+            case 'proofread':
+                systemPrompt += " 제공된 텍스트의 본래 톤과 맥락은 완벽히 유지하되, 오탈자, 띄어쓰기, 문법적 오류, 어색한 문장 구조만 전문가 수준으로 깔끔하게 교정해 주세요. 교정된 결과물만 출력하세요.";
+                break;
             default:
                 systemPrompt += " 이 글의 의도를 파악하여 문맥을 매끄럽게 포맷팅하고 단락을 세련되게 구조화하세요.";
         }

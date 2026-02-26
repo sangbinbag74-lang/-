@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import Link from "next/link";
-import { ArrowLeft, Mic, Sparkles, Send, Save, Eye, MoreHorizontal } from "lucide-react";
+import { ArrowLeft, Mic, Sparkles, Send, Save, Eye, MoreHorizontal, ImageIcon } from "lucide-react";
 import { savePost } from "./actions";
+import { supabase } from '@/lib/supabase/client';
 
 export default function AIEditor() {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [isRecording, setIsRecording] = useState(false);
     const [isAiProcessing, setIsAiProcessing] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
     const [isPending, startTransition] = useTransition();
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleSave = (status: 'draft' | 'published') => {
         if (!title && !content) return;
@@ -58,6 +61,43 @@ export default function AIEditor() {
             console.error(e);
         } finally {
             setIsAiProcessing(false);
+        }
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+
+            const { error } = await supabase.storage
+                .from('post-images')
+                .upload(fileName, file);
+
+            if (error) {
+                console.error("Upload error:", error);
+                alert(`이미지 업로드 실패: ${error.message}`);
+                return;
+            }
+
+            const { data: publicUrlData } = supabase.storage
+                .from('post-images')
+                .getPublicUrl(fileName);
+
+            const imageUrl = publicUrlData.publicUrl;
+
+            // Insert markdown image syntax at the end of content
+            setContent(prev => prev + `\n\n![${file.name}](${imageUrl})\n\n`);
+
+        } catch (error) {
+            console.error("Error in upload process:", error);
+            alert("이미지 업로드 중 오류가 발생했습니다.");
+        } finally {
+            setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
@@ -127,6 +167,25 @@ export default function AIEditor() {
                             <Sparkles className={`w-4 h-4 ${isAiProcessing ? 'animate-spin' : ''}`} />
                             자동 포맷팅
                         </button>
+
+                        <div className="w-px h-6 bg-border mx-1"></div>
+
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            ref={fileInputRef}
+                            onChange={handleImageUpload}
+                        />
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploading}
+                            className="p-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:bg-accent text-foreground transition-colors disabled:opacity-50"
+                        >
+                            <ImageIcon className={`w-4 h-4 ${isUploading ? 'animate-pulse' : ''}`} />
+                            {isUploading ? '업로드 중...' : '이미지 추가'}
+                        </button>
+
                         <button className="p-2.5 rounded-lg hover:bg-accent text-muted-foreground transition-colors">
                             <MoreHorizontal className="w-4 h-4" />
                         </button>
@@ -188,19 +247,35 @@ export default function AIEditor() {
                             </button>
                             <button
                                 disabled={isAiProcessing || !content}
+                                onClick={() => handleToneChange('expand')}
+                                className="w-full p-3 flex flex-col items-start gap-1 rounded-xl hover:bg-accent border border-transparent hover:border-border/60 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <span className="text-sm font-semibold text-foreground group-hover:text-brand-mutedBlue">본문 내용 확장하기</span>
+                                <span className="text-xs text-muted-foreground">논리를 보강하여 글 분량을 2배로 확장</span>
+                            </button>
+                            <button
+                                disabled={isAiProcessing || !content}
+                                onClick={() => handleToneChange('proofread')}
+                                className="w-full p-3 flex flex-col items-start gap-1 rounded-xl hover:bg-accent border border-transparent hover:border-border/60 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <span className="text-sm font-semibold text-foreground group-hover:text-brand-mutedBlue">문법 및 맞춤법 교정</span>
+                                <span className="text-xs text-muted-foreground">오탈자와 띄어쓰기를 완벽하게 교정</span>
+                            </button>
+                            <button
+                                disabled={isAiProcessing || !content}
                                 onClick={() => handleToneChange('search_data')}
                                 className="w-full p-3 flex flex-col items-start gap-1 rounded-xl hover:bg-accent border border-transparent hover:border-border/60 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <span className="text-sm font-semibold text-foreground group-hover:text-brand-mutedBlue">데이터 포인트 검색</span>
-                                <span className="text-xs text-muted-foreground">글을 뒷받침할 객관적 통계 추가</span>
+                                <span className="text-xs text-muted-foreground">글의 신뢰도를 높여줄 최신 통계 추가</span>
                             </button>
                             <button
                                 disabled={isAiProcessing || !content}
                                 onClick={() => handleToneChange('suggest_title')}
                                 className="w-full p-3 flex flex-col items-start gap-1 rounded-xl hover:bg-accent border border-transparent hover:border-border/60 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                <span className="text-sm font-semibold text-foreground group-hover:text-brand-mutedBlue">제목 풀 제안받기</span>
-                                <span className="text-xs text-muted-foreground">시선을 끄는 매력적인 헤드라인 5개 추천</span>
+                                <span className="text-sm font-semibold text-foreground group-hover:text-brand-mutedBlue">제목 추천받기</span>
+                                <span className="text-xs text-muted-foreground">시선을 끄는 매력적인 제목 5가지</span>
                             </button>
                         </div>
                     </div>
