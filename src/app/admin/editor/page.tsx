@@ -1,18 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { ArrowLeft, Mic, Sparkles, Send, Save, Eye, MoreHorizontal } from "lucide-react";
+import { savePost } from "./actions";
 
 export default function AIEditor() {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [isRecording, setIsRecording] = useState(false);
     const [isAiProcessing, setIsAiProcessing] = useState(false);
+    const [isPending, startTransition] = useTransition();
+
+    const handleSave = (status: 'draft' | 'published') => {
+        if (!title && !content) return;
+
+        startTransition(async () => {
+            const result = await savePost({ title, content, status });
+            if (result?.error) {
+                alert(result.error);
+            }
+        });
+    };
 
     const toggleRecording = () => {
         setIsRecording(!isRecording);
-        // In a real app, this would tie into the browser's MediaRecorder API and OpenAI Whisper
     };
 
     const handleAiAssist = async () => {
@@ -59,14 +71,24 @@ export default function AIEditor() {
                     대시보드로 돌아가기
                 </Link>
                 <div className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground font-medium mr-2">오전 10:42분 초안 저장됨</span>
+                    <span className="text-xs text-muted-foreground font-medium mr-2">
+                        {isPending ? '저장 중...' : '자동 저장 활성화됨'}
+                    </span>
                     <button className="p-2 border border-border/60 rounded-lg text-muted-foreground hover:bg-accent transition-colors" aria-label="미리보기">
                         <Eye className="w-4 h-4" />
                     </button>
-                    <button className="px-4 py-2 border border-border/60 rounded-lg text-sm font-medium hover:bg-accent transition-colors flex items-center">
+                    <button
+                        onClick={() => handleSave('draft')}
+                        disabled={isPending}
+                        className="px-4 py-2 border border-border/60 rounded-lg text-sm font-medium hover:bg-accent transition-colors flex items-center disabled:opacity-50"
+                    >
                         <Save className="w-4 h-4 mr-2" /> 초안 저장
                     </button>
-                    <button className="px-5 py-2 bg-brand-deepNavy dark:bg-foreground text-white dark:text-background rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity flex items-center">
+                    <button
+                        onClick={() => handleSave('published')}
+                        disabled={isPending}
+                        className="px-5 py-2 bg-brand-deepNavy dark:bg-foreground text-white dark:text-background rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity flex items-center disabled:opacity-50"
+                    >
                         <Send className="w-4 h-4 mr-2" /> 발행하기
                     </button>
                 </div>

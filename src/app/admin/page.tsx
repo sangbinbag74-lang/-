@@ -1,21 +1,40 @@
 import Link from "next/link";
 import { BarChart3, Users, FileText, MousePointerClick, Plus, Settings, ArrowUpRight, LogOut } from "lucide-react";
 import { logout } from '@/app/login/actions'
+import { createClient } from '@/lib/supabase/server'
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+    const supabase = createClient()
+
+    // 1. Fetch recent posts
+    const { data: dbPosts } = await supabase
+        .from('posts')
+        .select('id, title, views, status, created_at')
+        .order('created_at', { ascending: false })
+        .limit(5)
+
+    // 2. Fetch all posts to calculate stats
+    const { data: allPosts } = await supabase
+        .from('posts')
+        .select('views, status')
+
+    const totalViews = allPosts?.reduce((sum, p) => sum + (p.views || 0), 0) || 0
+    const publishedCount = allPosts?.filter(p => p.status === 'published' || p.status === '발행됨').length || 0
+
     const stats = [
-        { title: "총 조회수", value: "124,592", change: "+12.5%", trend: "up", icon: BarChart3 },
-        { title: "순 방문자", value: "45,231", change: "+8.2%", trend: "up", icon: Users },
-        { title: "발행된 글", value: "142", change: "이번 주 +3", trend: "neutral", icon: FileText },
-        { title: "클릭률", value: "24.3%", change: "-1.1%", trend: "down", icon: MousePointerClick },
+        { title: "총 조회수", value: totalViews.toLocaleString(), change: "최근 누적", trend: "neutral", icon: BarChart3 },
+        { title: "순 방문자", value: "준비 중", change: "트래킹 예정", trend: "neutral", icon: Users },
+        { title: "발행된 글", value: publishedCount.toString(), change: `전체 ${allPosts?.length || 0}개 중`, trend: "neutral", icon: FileText },
+        { title: "클릭률", value: "준비 중", change: "분석 연동 예정", trend: "neutral", icon: MousePointerClick },
     ];
 
-    const recentPosts = [
-        { id: 1, title: "개인 미디어에서 AI의 진화: 스토리텔링의 새로운 시대", views: "12.4k", date: "오늘", status: "발행됨" },
-        { id: 2, title: "공간 컴퓨팅: 고글 그 너머로", views: "8.2k", date: "어제", status: "발행됨" },
-        { id: 3, title: "금리 인상 이후 시대의 시장 변화", views: "15.1k", date: "2일 전", status: "발행됨" },
-        { id: 4, title: "초안: 2025년 웹 디자인 미학", views: "-", date: "-", status: "초안" },
-    ];
+    const recentPosts = dbPosts?.map(post => ({
+        id: post.id,
+        title: post.title,
+        views: (post.views || 0).toLocaleString(),
+        date: new Date(post.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }),
+        status: post.status === 'draft' ? '초안' : post.status === 'published' ? '발행됨' : post.status
+    })) || [];
 
     return (
         <div className="container mx-auto max-w-screen-xl px-4 lg:px-8 py-8 md:py-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
