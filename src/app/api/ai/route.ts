@@ -60,8 +60,9 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ result });
 
-    } catch (error: any) {
+    } catch (error) {
         console.error('OpenAI API error:', error);
-        return NextResponse.json({ error: error.message || 'Failed to process AI request' }, { status: 500 });
+        const errMessage = error instanceof Error ? error.message : 'Failed to process AI request';
+        return NextResponse.json({ error: errMessage }, { status: 500 });
     }
 }
