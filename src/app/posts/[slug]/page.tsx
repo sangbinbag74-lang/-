@@ -5,14 +5,15 @@ import { notFound } from 'next/navigation';
 
 export default async function PostPage({ params }: { params: { slug: string } }) {
     const supabase = createClient();
+    const decodedSlug = decodeURIComponent(params.slug);
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    const isId = uuidRegex.test(params.slug);
+    const isId = uuidRegex.test(decodedSlug);
 
     let query = supabase.from('posts').select('*');
     if (isId) {
-        query = query.eq('id', params.slug);
+        query = query.eq('id', decodedSlug);
     } else {
-        query = query.eq('slug', params.slug);
+        query = query.eq('slug', decodedSlug);
     }
 
     const { data: post } = await query.single();
