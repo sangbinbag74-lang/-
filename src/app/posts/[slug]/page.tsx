@@ -5,11 +5,17 @@ import { notFound } from 'next/navigation';
 
 export default async function PostPage({ params }: { params: { slug: string } }) {
     const supabase = createClient();
-    const { data: post } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('slug', params.slug)
-        .single();
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const isId = uuidRegex.test(params.slug);
+
+    let query = supabase.from('posts').select('*');
+    if (isId) {
+        query = query.eq('id', params.slug);
+    } else {
+        query = query.eq('slug', params.slug);
+    }
+
+    const { data: post } = await query.single();
 
     if (!post) {
         notFound();

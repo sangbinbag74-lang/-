@@ -69,3 +69,29 @@ export async function savePost(data: { id?: string; title: string; content: stri
 
     return { success: true, id: resultId }
 }
+
+export async function deletePost(id: string) {
+    const supabase = createClient()
+
+    // 1. Check if authenticated
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+        return { error: '인증되지 않은 사용자입니다.' }
+    }
+
+    const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', id)
+
+    if (error) {
+        console.error('Delete post error:', error)
+        return { error: `글 삭제 실패: ${error.message}` }
+    }
+
+    revalidatePath('/admin')
+    revalidatePath('/admin/posts')
+    revalidatePath('/')
+
+    return { success: true }
+}

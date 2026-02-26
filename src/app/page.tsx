@@ -32,7 +32,7 @@ export default async function Home() {
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[250px]">
         {/* Main Feature - 2x2 */}
         {mainPost ? (
-          <Link href={`/posts/${mainPost.slug}`} className="group col-span-1 md:col-span-2 row-span-2 rounded-[2rem] overflow-hidden relative border border-border/50 bg-card text-card-foreground shadow-sm hover:shadow-md transition-all">
+          <Link href={`/posts/${mainPost.slug || mainPost.id}`} className="group col-span-1 md:col-span-2 row-span-2 rounded-[2rem] overflow-hidden relative border border-border/50 bg-card text-card-foreground shadow-sm hover:shadow-md transition-all">
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10 transition-opacity group-hover:opacity-90"></div>
 
             {/* Decorative background representing an image */}
@@ -66,7 +66,7 @@ export default async function Home() {
           </div>
           <div className="flex-1 overflow-y-auto space-y-5 pr-2 custom-scrollbar">
             {shorts.length > 0 ? shorts.map((post) => (
-              <Link href={`/posts/${post.slug}`} key={post.id} className="block group cursor-pointer space-y-2 pb-5 border-b border-border/40 last:border-0">
+              <Link href={`/posts/${post.slug || post.id}`} key={post.id} className="block group cursor-pointer space-y-2 pb-5 border-b border-border/40 last:border-0">
                 <p className="text-sm text-foreground/80 group-hover:text-foreground transition-colors leading-relaxed line-clamp-3">
                   &quot;{post.summary || post.content.substring(0, 100)}...&quot;
                 </p>
@@ -80,7 +80,7 @@ export default async function Home() {
 
         {/* Standard Card 1 - 1x1 */}
         {standardPost1 && (
-          <Link href={`/posts/${standardPost1.slug}`} className="group col-span-1 row-span-1 rounded-[2rem] border border-border/50 bg-card p-8 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+          <Link href={`/posts/${standardPost1.slug || standardPost1.id}`} className="group col-span-1 row-span-1 rounded-[2rem] border border-border/50 bg-card p-8 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
             <div className="space-y-3">
               <span className="text-xs font-semibold text-brand-mutedBlue tracking-wide uppercase">인사이트</span>
               <h3 className="font-bold text-xl font-serif leading-tight group-hover:text-brand-mutedBlue transition-colors text-foreground line-clamp-2">
@@ -96,7 +96,7 @@ export default async function Home() {
 
         {/* Standard Card 2 (High Contrast) - 1x1 */}
         {standardPost2 && (
-          <Link href={`/posts/${standardPost2.slug}`} className="group col-span-1 row-span-1 rounded-[2rem] border border-transparent p-8 shadow-sm hover:shadow-md transition-all flex flex-col justify-between bg-brand-charcoal text-white dark:bg-card dark:border-border/50 dark:text-card-foreground">
+          <Link href={`/posts/${standardPost2.slug || standardPost2.id}`} className="group col-span-1 row-span-1 rounded-[2rem] border border-transparent p-8 shadow-sm hover:shadow-md transition-all flex flex-col justify-between bg-brand-charcoal text-white dark:bg-card dark:border-border/50 dark:text-card-foreground">
             <div className="space-y-3">
               <span className="text-xs font-semibold text-gray-400 dark:text-brand-mutedBlue tracking-wide uppercase">인사이트</span>
               <h3 className="font-bold text-xl font-serif leading-tight group-hover:text-gray-200 dark:group-hover:text-brand-mutedBlue transition-colors line-clamp-2">

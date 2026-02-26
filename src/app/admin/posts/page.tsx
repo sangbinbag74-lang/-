@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, FileText, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, FileText, Pencil, Plus } from "lucide-react";
+import DeletePostButton from "./DeletePostButton";
 import { createClient } from '@/lib/supabase/server';
 
 export default async function AdminPosts() {
@@ -54,14 +55,14 @@ export default async function AdminPosts() {
                             ) : posts?.map((post) => (
                                 <tr key={post.id} className="hover:bg-accent/30 transition-colors group">
                                     <td className="px-6 py-4 font-semibold text-foreground">
-                                        <Link href={`/posts/${post.slug}`} className="hover:text-brand-mutedBlue transition-colors" target="_blank">
+                                        <Link href={`/posts/${post.slug || post.id}`} className="hover:text-brand-mutedBlue transition-colors" target="_blank">
                                             {post.title}
                                         </Link>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${post.status === 'published' || post.status === '발행됨'
-                                                ? 'bg-green-500/10 text-green-600 dark:text-green-400'
-                                                : 'bg-orange-500/10 text-orange-600 dark:text-orange-400'
+                                            ? 'bg-green-500/10 text-green-600 dark:text-green-400'
+                                            : 'bg-orange-500/10 text-orange-600 dark:text-orange-400'
                                             }`}>
                                             {post.status === 'draft' ? '초안' : post.status === 'published' ? '발행됨' : post.status}
                                         </span>
@@ -76,9 +77,7 @@ export default async function AdminPosts() {
                                         <Link href={`/admin/editor?id=${post.id}`} className="inline-flex p-2 text-muted-foreground hover:text-brand-mutedBlue hover:bg-accent rounded-lg transition-colors" title="수정">
                                             <Pencil className="w-4 h-4" />
                                         </Link>
-                                        <button className="inline-flex p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors" title="삭제 (지원 예정)">
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
+                                        <DeletePostButton id={post.id} />
                                     </td>
                                 </tr>
                             ))}
