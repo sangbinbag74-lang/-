@@ -19,6 +19,7 @@ function EditorContent() {
     const [isUploading, setIsUploading] = useState(false);
     const [isPending, startTransition] = useTransition();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
         if (postId) {
@@ -113,9 +114,22 @@ function EditorContent() {
                 .getPublicUrl(fileName);
 
             const imageUrl = publicUrlData.publicUrl;
+            const imageMarkdown = `\n![${file.name}](${imageUrl})\n`;
 
-            // Insert markdown image syntax at the end of content
-            setContent(prev => prev + `\n\n![${file.name}](${imageUrl})\n\n`);
+            const textarea = textareaRef.current;
+            if (textarea) {
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const newContent = content.substring(0, start) + imageMarkdown + content.substring(end);
+                setContent(newContent);
+
+                setTimeout(() => {
+                    textarea.focus();
+                    textarea.setSelectionRange(start + imageMarkdown.length, start + imageMarkdown.length);
+                }, 0);
+            } else {
+                setContent(prev => prev + imageMarkdown);
+            }
 
         } catch (error) {
             console.error("Error in upload process:", error);
@@ -217,6 +231,7 @@ function EditorContent() {
                     </div>
 
                     <textarea
+                        ref={textareaRef}
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                         placeholder="글을 작성하거나, 음성 입력을 통해 생각을 기록해 보세요..."
