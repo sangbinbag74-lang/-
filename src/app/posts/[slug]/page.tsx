@@ -76,7 +76,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
                             <h3 className="font-bold text-lg tracking-tight">AI 요약</h3>
                         </div>
                         <div className="text-foreground/80 text-lg md:text-xl font-medium leading-relaxed">
-                            {post.summary}
+                            {post.summary.replace(/!\[.*?\]\(.*?\)/g, '')}
                         </div>
                     </div>
                 </section>

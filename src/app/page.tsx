@@ -16,6 +16,11 @@ export default async function Home() {
   const standardPost1 = posts?.[5] || posts?.[1];
   const standardPost2 = posts?.[6] || posts?.[2];
 
+  const getExcerpt = (post: { summary?: string; content?: string }, length: number) => {
+    const text = post.summary || post.content || '';
+    return text.replace(/!\[.*?\]\(.*?\)/g, '').substring(0, length);
+  };
+
   return (
     <div className="container mx-auto max-w-screen-xl px-4 lg:px-8 py-8 md:py-12 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Date & Greeting */}
@@ -47,7 +52,7 @@ export default async function Home() {
                 {mainPost.title}
               </h2>
               <p className="text-gray-200 line-clamp-2 md:text-lg font-light leading-relaxed">
-                {mainPost.summary || mainPost.content.substring(0, 150)}
+                {getExcerpt(mainPost, 150)}
               </p>
               <div className="text-sm text-gray-300 font-medium">에디터 작성 • {new Date(mainPost.created_at).toLocaleDateString('ko-KR')}</div>
             </div>
@@ -68,7 +73,7 @@ export default async function Home() {
             {shorts.length > 0 ? shorts.map((post) => (
               <Link href={`/posts/${post.slug || post.id}`} key={post.id} className="block group cursor-pointer space-y-2 pb-5 border-b border-border/40 last:border-0">
                 <p className="text-sm text-foreground/80 group-hover:text-foreground transition-colors leading-relaxed line-clamp-3">
-                  &quot;{post.summary || post.content.substring(0, 100)}...&quot;
+                  &quot;{getExcerpt(post, 100)}...&quot;
                 </p>
                 <div className="text-xs text-muted-foreground font-medium">{new Date(post.created_at).toLocaleDateString('ko-KR')}</div>
               </Link>
@@ -87,7 +92,7 @@ export default async function Home() {
                 {standardPost1.title}
               </h3>
               <p className="text-sm text-muted-foreground line-clamp-2">
-                {standardPost1.summary || standardPost1.content.substring(0, 100)}
+                {getExcerpt(standardPost1, 100)}
               </p>
             </div>
             <div className="text-xs text-muted-foreground mt-4 font-medium">{new Date(standardPost1.created_at).toLocaleDateString('ko-KR')}</div>
@@ -103,7 +108,7 @@ export default async function Home() {
                 {standardPost2.title}
               </h3>
               <p className="text-sm text-gray-300 dark:text-muted-foreground line-clamp-2">
-                {standardPost2.summary || standardPost2.content.substring(0, 100)}
+                {getExcerpt(standardPost2, 100)}
               </p>
             </div>
             <div className="text-xs text-gray-400 dark:text-muted-foreground mt-4 font-medium">{new Date(standardPost2.created_at).toLocaleDateString('ko-KR')}</div>

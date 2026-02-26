@@ -13,7 +13,8 @@ export async function savePost(data: { id?: string; title: string; content: stri
     }
 
     // 2. Simple AI Summary mock
-    const summary = data.content.substring(0, 100) + '...'
+    const plainText = data.content.replace(/!\[.*?\]\(.*?\)/g, '').trim()
+    const summary = plainText.substring(0, 100) + (plainText.length > 100 ? '...' : '')
 
     let resultId = data.id;
 
