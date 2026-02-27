@@ -3,9 +3,9 @@
 import { useState, useTransition, useRef, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Sparkles, Send, Save, Eye, MoreHorizontal, ImageIcon, Heading2, Heading3, Bold, Italic, Link as LinkIcon, List, Quote } from "lucide-react";
-import { savePost } from "./actions";
+import { ArrowLeft, Sparkles, Send, Save, Eye, MoreHorizontal, ImageIcon, Heading2, Heading3, Bold, Italic, Link as LinkIcon, List, Quote, Undo2, Redo2 } from "lucide-react";
 import { supabase } from '@/lib/supabase/client';
+import { savePost } from "./actions";
 
 function EditorContent() {
     const searchParams = useSearchParams();
@@ -22,6 +22,56 @@ function EditorContent() {
     const [isPending, startTransition] = useTransition();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    // History state for Undo/Redo
+    const [past, setPast] = useState<string[]>([]);
+    const [future, setFuture] = useState<string[]>([]);
+
+    const updateContent = (newContent: string, saveHistory = true) => {
+        if (saveHistory && content !== newContent) {
+            setPast(prev => [...prev, content].slice(-50)); // Keep last 50 states
+            setFuture([]);
+        }
+        setContent(newContent);
+    };
+
+    const handleUndo = () => {
+        if (past.length === 0) return;
+        const previous = past[past.length - 1];
+        setFuture(prev => [content, ...prev]);
+        setPast(prev => prev.slice(0, -1));
+        setContent(previous);
+    };
+
+    const handleRedo = () => {
+        if (future.length === 0) return;
+        const next = future[0];
+        setPast(prev => [...prev, content]);
+        setFuture(prev => prev.slice(1));
+        setContent(next);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+            e.preventDefault();
+            if (e.shiftKey) {
+                handleRedo();
+            } else {
+                handleUndo();
+            }
+        } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+            e.preventDefault();
+            handleRedo();
+        } else if (e.key === ' ' || e.key === 'Enter') {
+            // Save state on word boundary or new line
+            setPast(prev => {
+                const last = prev[prev.length - 1];
+                if (last !== content) return [...prev, content].slice(-50);
+                return prev;
+            });
+            setFuture([]);
+        }
+    };
 
     useEffect(() => {
         if (postId) {
@@ -69,7 +119,7 @@ function EditorContent() {
                 body: JSON.stringify({ text: content, mode: 'tone_journalistic' }) // Default formatting
             });
             const data = await res.json();
-            if (data.result) setContent(data.result);
+            if (data.result) updateContent(data.result);
         } catch (e) {
             console.error(e);
         } finally {
@@ -96,7 +146,7 @@ function EditorContent() {
                 } else if (mode === 'summarize') {
                     setSummary(data.result);
                 } else {
-                    setContent(data.result);
+                    updateContent(data.result);
                 }
             }
         } catch (e) {
@@ -137,14 +187,14 @@ function EditorContent() {
                 const start = textarea.selectionStart;
                 const end = textarea.selectionEnd;
                 const newContent = content.substring(0, start) + imageMarkdown + content.substring(end);
-                setContent(newContent);
+                updateContent(newContent);
                 // Move cursor
                 setTimeout(() => {
                     textarea.selectionStart = textarea.selectionEnd = start + imageMarkdown.length;
                     textarea.focus();
                 }, 0);
             } else {
-                setContent(prev => prev + imageMarkdown);
+                updateContent(content + imageMarkdown);
             }
         } catch (error) {
             console.error(error);
@@ -185,13 +235,13 @@ function EditorContent() {
                     const start = textarea.selectionStart;
                     const end = textarea.selectionEnd;
                     const newContent = content.substring(0, start) + imageMarkdown + content.substring(end);
-                    setContent(newContent);
+                    updateContent(newContent);
                     setTimeout(() => {
                         textarea.selectionStart = textarea.selectionEnd = start + imageMarkdown.length;
                         textarea.focus();
                     }, 0);
                 } else {
-                    setContent(prev => imageMarkdown + prev);
+                    updateContent(imageMarkdown + content);
                 }
             }
         } catch (e) {
@@ -317,6 +367,14 @@ function EditorContent() {
                             <button onClick={() => insertMarkdown('[', '](url)')} className="p-2 shadow-sm rounded-lg hover:bg-accent text-foreground transition-colors" title="링크"><LinkIcon className="w-4 h-4" /></button>
                         </div>
 
+                        {/* Undo / Redo */}
+                        <div className="flex items-center gap-0.5 ml-2">
+                            <button onClick={handleUndo} disabled={past.length === 0} className="p-2 shadow-sm rounded-lg hover:bg-accent text-foreground transition-colors disabled:opacity-30" title="실행 취소 (Ctrl+Z)"><Undo2 className="w-4 h-4" /></button>
+                            <button onClick={handleRedo} disabled={future.length === 0} className="p-2 shadow-sm rounded-lg hover:bg-accent text-foreground transition-colors disabled:opacity-30" title="다시 실행 (Ctrl+Y)"><Redo2 className="w-4 h-4" /></button>
+                        </div>
+
+                        <div className="w-px h-6 bg-border mx-1 hidden md:block"></div>
+
                         <input
                             type="file"
                             accept="image/*"
@@ -350,7 +408,8 @@ function EditorContent() {
                     <textarea
                         ref={textareaRef}
                         value={content}
-                        onChange={(e) => setContent(e.target.value)}
+                        onChange={(e) => updateContent(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         placeholder="글을 작성하거나, 음성 입력을 통해 생각을 기록해 보세요..."
                         className="w-full flex-1 resize-none bg-transparent border-none outline-none text-lg md:text-xl font-sans font-light leading-relaxed placeholder:text-muted-foreground/50 focus:ring-0 text-foreground custom-scrollbar"
                     />
