@@ -1,7 +1,48 @@
+"use client";
+
+import { useState, useTransition, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Settings as SettingsIcon, Save, User, Globe, Bell, Shield } from "lucide-react";
+import { getSettings, saveSettings, SiteSettings } from "./actions";
 
 export default function AdminSettings() {
+    const [settings, setSettings] = useState<SiteSettings>({
+        siteName: "",
+        homeGreeting: "",
+        homeDescription: "",
+        aboutContent: ""
+    });
+    const [isLoading, setIsLoading] = useState(true);
+    const [isPending, startTransition] = useTransition();
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            const data = await getSettings();
+            setSettings(data);
+            setIsLoading(false);
+        };
+        fetchSettings();
+    }, []);
+
+    const handleChange = (field: keyof SiteSettings, value: string) => {
+        setSettings(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleSave = () => {
+        startTransition(async () => {
+            const result = await saveSettings(settings);
+            if (result.error) {
+                alert(result.error);
+            } else {
+                alert("성공적으로 저장되었습니다.");
+            }
+        });
+    };
+
+    if (isLoading) {
+        return <div className="container mx-auto p-12 text-center text-muted-foreground">설정을 불러오는 중입니다...</div>;
+    }
+
     return (
         <div className="container mx-auto max-w-screen-xl px-4 lg:px-8 py-8 md:py-12 animate-in fade-in slide-in-from-bottom-4 duration-700 min-h-[calc(100vh-140px)] flex flex-col">
             {/* Header */}
@@ -18,8 +59,12 @@ export default function AdminSettings() {
                         </h1>
                         <p className="text-muted-foreground mt-1 text-sm">기본 플랫폼 정보 및 에디터 계정 설정을 관리할 수 있습니다.</p>
                     </div>
-                    <button className="inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors bg-brand-deepNavy dark:bg-foreground text-white dark:text-background hover:opacity-90 h-10 px-6 py-2 shadow-sm font-semibold">
-                        <Save className="mr-2 h-4 w-4" /> 변경사항 저장
+                    <button
+                        onClick={handleSave}
+                        disabled={isPending}
+                        className="inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors bg-brand-deepNavy dark:bg-foreground text-white dark:text-background hover:opacity-90 h-10 px-6 py-2 shadow-sm font-semibold disabled:opacity-50"
+                    >
+                        <Save className="mr-2 h-4 w-4" /> {isPending ? '저장 중...' : '변경사항 저장'}
                     </button>
                 </div>
             </div>
@@ -44,42 +89,44 @@ export default function AdminSettings() {
                 {/* Form Content */}
                 <div className="flex-1 max-w-3xl space-y-8">
                     <div className="rounded-2xl border border-border/50 bg-card shadow-sm p-6 space-y-6">
-                        <h2 className="text-lg font-bold border-b border-border/50 pb-4">기본 사이트 정보</h2>
+                        <h2 className="text-lg font-bold border-b border-border/50 pb-4">홈 화면 텍스트 설정</h2>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold text-foreground">사이트 이름</label>
+                            <label className="text-sm font-semibold text-foreground">홈 화면 인사말</label>
                             <input
                                 type="text"
-                                defaultValue="포워드 익산"
+                                value={settings.homeGreeting}
+                                onChange={(e) => handleChange('homeGreeting', e.target.value)}
                                 className="w-full rounded-xl px-4 py-2.5 bg-background border border-border/60 focus:outline-none focus:ring-2 focus:ring-brand-mutedBlue/50 transition-all font-sans"
                             />
-                            <p className="text-xs text-muted-foreground mt-1">헤더 및 메타 테그에 노출되는 플랫폼 공식 명칭입니다.</p>
+                            <p className="text-xs text-muted-foreground mt-1">예: &quot;좋은 아침입니다.&quot;</p>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold text-foreground">사이트 설명</label>
-                            <textarea
-                                defaultValue="기술, 비즈니스, 디자인 등 다양한 분야의 인사이트를 간결하게 전달하는 1인 레이블 매거진입니다."
-                                rows={3}
-                                className="w-full resize-none rounded-xl px-4 py-2.5 bg-background border border-border/60 focus:outline-none focus:ring-2 focus:ring-brand-mutedBlue/50 transition-all font-sans"
+                            <label className="text-sm font-semibold text-foreground">홈 화면 타이틀 설명</label>
+                            <input
+                                type="text"
+                                value={settings.homeDescription}
+                                onChange={(e) => handleChange('homeDescription', e.target.value)}
+                                className="w-full rounded-xl px-4 py-2.5 bg-background border border-border/60 focus:outline-none focus:ring-2 focus:ring-brand-mutedBlue/50 transition-all font-sans"
                             />
+                            <p className="text-xs text-muted-foreground mt-1">인사말 바로 아래에 작게 노출되는 서브 타이틀입니다.</p>
                         </div>
                     </div>
 
                     <div className="rounded-2xl border border-border/50 bg-card shadow-sm p-6 space-y-6">
-                        <div className="flex items-center justify-between border-b border-border/50 pb-4">
-                            <div>
-                                <h2 className="text-lg font-bold">SEO 설정</h2>
-                                <p className="text-xs text-muted-foreground mt-1">구글 및 네이버 검색 최적화</p>
-                            </div>
-                        </div>
+                        <h2 className="text-lg font-bold border-b border-border/50 pb-4">소개 (About) 페이지 콘텐츠</h2>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold text-foreground">인덱싱 허용</label>
-                            <div className="flex items-center gap-2">
-                                <input type="checkbox" defaultChecked className="w-4 h-4 text-brand-mutedBlue rounded border-border" />
-                                <span className="text-sm text-foreground">검색 엔진이 이 사이트를 검색 결과에 노출하도록 허용합니다.</span>
-                            </div>
+                            <label className="text-sm font-semibold text-foreground">소개글 내용</label>
+                            <textarea
+                                value={settings.aboutContent}
+                                onChange={(e) => handleChange('aboutContent', e.target.value)}
+                                rows={8}
+                                className="w-full resize-none rounded-xl px-4 py-2.5 bg-background border border-border/60 focus:outline-none focus:ring-2 focus:ring-brand-mutedBlue/50 transition-all font-sans custom-scrollbar"
+                                placeholder="마크다운(Markdown) 문법을 사용하여 /about 페이지에 노출될 소개글을 작성하세요."
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">마크다운(## 소제목, **굵게**, 링크 등)을 지원합니다.</p>
                         </div>
                     </div>
 
