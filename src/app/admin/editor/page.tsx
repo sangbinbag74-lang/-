@@ -13,6 +13,7 @@ function EditorContent() {
     const postId = searchParams.get('id');
 
     const [title, setTitle] = useState("");
+    const [summary, setSummary] = useState("");
     const [content, setContent] = useState("");
     const [suggestedTitles, setSuggestedTitles] = useState<string[]>([]);
     const [isAiProcessing, setIsAiProcessing] = useState(false);
@@ -27,6 +28,7 @@ function EditorContent() {
                 const { data } = await supabase.from('posts').select('*').eq('id', postId).single();
                 if (data) {
                     setTitle(data.title || "");
+                    setSummary(data.summary || "");
                     setContent(data.content || "");
                 }
             };
@@ -38,7 +40,7 @@ function EditorContent() {
         if (!title && !content) return;
 
         startTransition(async () => {
-            const result = await savePost({ id: postId || undefined, title, content, status });
+            const result = await savePost({ id: postId || undefined, title, content, summary, status });
             if (result?.error) {
                 alert(result.error);
             } else if (result?.success) {
@@ -86,7 +88,7 @@ function EditorContent() {
                         .filter((line: string) => line.length > 0);
                     setSuggestedTitles(titles);
                 } else if (mode === 'summarize') {
-                    setContent(prev => '[AI 3줄 요약]\n' + data.result + '\n\n---\n\n' + prev);
+                    setSummary(data.result);
                 } else {
                     setContent(data.result);
                 }
@@ -212,7 +214,15 @@ function EditorContent() {
                         placeholder="기사 제목..."
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="w-full text-4xl md:text-5xl font-serif font-bold bg-transparent border-none outline-none placeholder:text-muted focus:ring-0 mb-6 text-foreground"
+                        className="w-full text-4xl md:text-5xl font-serif font-bold bg-transparent border-none outline-none placeholder:text-muted focus:ring-0 mb-4 text-foreground"
+                    />
+
+                    <textarea
+                        placeholder="여기에 핵심 요약(AI 3줄 요약)을 입력하거나 우측 비서 AI로 자동 생성하세요..."
+                        value={summary}
+                        onChange={(e) => setSummary(e.target.value)}
+                        className="w-full text-lg bg-card border border-border/50 rounded-xl p-4 outline-none placeholder:text-muted focus:ring-1 focus:ring-brand-mutedBlue/50 mb-6 text-foreground/80 resize-none"
+                        rows={3}
                     />
 
                     <div className="flex items-center gap-2 mb-6 p-2 bg-card border border-border/50 rounded-xl shadow-sm w-fit">

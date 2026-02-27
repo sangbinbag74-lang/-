@@ -23,7 +23,7 @@ export async function POST(req: Request) {
                 systemPrompt += " 제공된 텍스트를 깊이 있고 신뢰감 있는 저널리즘(기사) 어조로 변경하세요.";
                 break;
             case 'summarize':
-                systemPrompt += " 제공된 텍스트를 독자가 가장 흥미로워할 3줄 요약 부울릿 포인트(1,2,3)로 핵심만 정리하세요.";
+                systemPrompt += " 제공된 텍스트의 전체 내용을 독자가 가장 흥미로워할 만한 핵심만 추려 2~3문장의 간결한 하나의 단락으로 요약하세요. 불릿 포인트나 기호 없이 깔끔하게 줄글로만 작성해야 합니다.";
                 break;
             case 'search_data':
                 systemPrompt += " 제공된 텍스트의 맥락에 어울리는 구체적인 최신 통계 데이터나 객관적인 사실 1~2가지를 덧붙여서 글을 더욱 풍부하게 만들어주세요.";

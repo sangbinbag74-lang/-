@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function savePost(data: { id?: string; title: string; content: string; status: 'draft' | 'published' }) {
+export async function savePost(data: { id?: string; title: string; content: string; summary?: string; status: 'draft' | 'published' }) {
     const supabase = createClient()
 
     // 1. Check if authenticated
@@ -12,15 +12,17 @@ export async function savePost(data: { id?: string; title: string; content: stri
         return { error: '인증되지 않은 사용자입니다.' }
     }
 
-    // 2. Simple AI Summary mock
-    // 마크다운 양식(이미지, 기호, 줄바꿈)을 제거하여 깔끔한 평문으로 요약본 생성
-    const plainText = data.content
-        .replace(/!\[.*?\]\(.*?\)/g, '') // 이미지 제거
-        .replace(/\[(.*?)\]\(.*?\)/g, '$1') // 링크는 링크 텍스트만 남김
-        .replace(/[#*`~>]/g, '') // 불필요한 마크다운 기호 제거
-        .replace(/\n+/g, ' ') // 줄바꿈을 공백으로 치환
-        .trim();
-    const summary = plainText.substring(0, 100) + (plainText.length > 100 ? '...' : '');
+    // 2. Summary handling
+    let finalSummary = data.summary;
+    if (!finalSummary) {
+        const plainText = data.content
+            .replace(/!\[.*?\]\(.*?\)/g, '') // 이미지 제거
+            .replace(/\[(.*?)\]\(.*?\)/g, '$1') // 링크는 링크 텍스트만 남김
+            .replace(/[#*`~>]/g, '') // 불필요한 마크다운 기호 제거
+            .replace(/\n+/g, ' ') // 줄바꿈을 공백으로 치환
+            .trim();
+        finalSummary = plainText.substring(0, 100) + (plainText.length > 100 ? '...' : '');
+    }
 
     let resultId = data.id;
 
@@ -32,7 +34,7 @@ export async function savePost(data: { id?: string; title: string; content: stri
             .update({
                 title: data.title || '새 문서',
                 content: data.content,
-                summary,
+                summary: finalSummary,
                 status: data.status,
                 published_at: data.status === 'published' ? new Date().toISOString() : null,
             })
@@ -54,7 +56,7 @@ export async function savePost(data: { id?: string; title: string; content: stri
                 title: data.title || '새 문서',
                 slug,
                 content: data.content,
-                summary,
+                summary: finalSummary,
                 status: data.status,
                 published_at: data.status === 'published' ? new Date().toISOString() : null,
                 author: user.email
