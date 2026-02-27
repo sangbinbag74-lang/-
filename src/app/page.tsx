@@ -1,20 +1,27 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { getSettings } from '@/app/admin/settings/actions';
 
 export default async function Home() {
   const supabase = createClient();
+  const settings = await getSettings();
 
-  const { data: posts } = await supabase
+  const { data: allPosts } = await supabase
     .from('posts')
     .select('*')
     .in('status', ['published', '발행됨'])
+    .neq('slug', 'system-settings') // Hide settings post
     .order('created_at', { ascending: false })
-    .limit(10);
+    .limit(30);
 
-  const mainPost = posts?.[0];
-  const shorts = posts?.slice(1, 5) || [];
-  const standardPost1 = posts?.[5] || posts?.[1];
-  const standardPost2 = posts?.[6] || posts?.[2];
+  // Filter posts into categories based on slug prefix
+  const rawPosts = allPosts || [];
+  const shorts = rawPosts.filter(p => p.slug?.startsWith('short-')).slice(0, 5);
+  const articles = rawPosts.filter(p => !p.slug?.startsWith('short-'));
+
+  const mainPost = articles[0];
+  const standardPost1 = articles[1];
+  const standardPost2 = articles[2];
 
   const getExcerpt = (post: { summary?: string; content?: string }, length: number) => {
     const text = post.summary || post.content || '';
@@ -38,10 +45,10 @@ export default async function Home() {
       {/* Date & Greeting */}
       <section className="space-y-2">
         <h1 className="text-3xl md:text-5xl font-serif font-bold text-brand-deepNavy dark:text-foreground tracking-tight">
-          좋은 아침입니다.
+          {settings.homeGreeting}
         </h1>
         <p className="text-muted-foreground text-lg">
-          육군 참모차장의 시선으로 그리는 익산의 새로운 비전
+          {settings.homeDescription}
         </p>
       </section>
 

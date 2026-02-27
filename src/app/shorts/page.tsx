@@ -10,6 +10,7 @@ export default async function ShortsPage() {
         .from('posts')
         .select('*')
         .in('status', ['published', '발행됨'])
+        .like('slug', 'short-%')
         .order('created_at', { ascending: false })
         .limit(20);
 
