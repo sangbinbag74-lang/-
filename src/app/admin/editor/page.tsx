@@ -279,6 +279,17 @@ function EditorContent() {
                         <div className="space-y-3">
                             <button
                                 disabled={isAiProcessing || !content}
+                                onClick={() => handleToneChange('generate_article')}
+                                className="w-full p-3 flex flex-col items-start gap-1 rounded-xl bg-brand-mutedBlue/10 hover:bg-brand-mutedBlue/20 border border-brand-mutedBlue/30 hover:border-brand-mutedBlue/50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed mb-2 shadow-sm"
+                            >
+                                <span className="text-sm font-bold text-brand-deepNavy dark:text-brand-mutedBlue flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4" />
+                                    아이디어로 기사 자동 작성
+                                </span>
+                                <span className="text-xs text-muted-foreground">간단한 메모만으로 완성된 뉴스 기사를 생성합니다</span>
+                            </button>
+                            <button
+                                disabled={isAiProcessing || !content}
                                 onClick={() => handleToneChange('summarize')}
                                 className="w-full p-3 flex flex-col items-start gap-1 rounded-xl hover:bg-accent border border-transparent hover:border-border/60 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
                             >
