@@ -16,33 +16,37 @@ export async function POST(req: Request) {
 
         const openai = new OpenAI({ apiKey });
 
-        // 1. Text -> Image Prompt (Using GPT-4o-mini for speed & cost efficiency)
+        // 1. Text -> Image Prompt via journalistic metaphor strategy
         const promptCompletion = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [
                 {
                     role: "system",
-                    content: `You are an expert prompt engineer for DALL-E 3. Read the provided Korean text and write a single English image prompt (max 40 words) for a safe, clean, professional editorial illustration.
-Rules:
-- Describe only peaceful, positive, neutral scenes such as landscapes, objects, workplaces, cityscapes, or abstract concepts.
-- Never include people's faces, identifiable individuals, weapons, violence, politics, or anything controversial.
-- Do NOT include any text, letters, or words in the described image.
-- Start the prompt with: "A safe, neutral, photorealistic editorial illustration of"
-- Output only the prompt text, nothing else.`
+                    content: `You are a visual editor at a world-class news magazine. Your job is to choose a symbolic, editorial visual concept for a news article — the kind a photo editor would choose for the cover of The Economist or TIME magazine.
+
+Read the provided Korean news article and output ONE English image prompt (max 45 words) for DALL-E 3.
+
+CRITICAL RULES:
+1. Use SYMBOLIC or METAPHORICAL imagery — never literal violence, real weapons, or identifiable people.
+   - Conflict/war → cracked flags, chess pieces on a map, broken bridges, storm clouds over a landmark, tangled barbed wire as abstract art
+   - Economic → tumbling coins, cracked stock graph, a scale tipping, currency symbols clashing
+   - Political → empty parliament, fractured globe, two abstract flags facing each other
+   - Technology → circuit boards, futuristic cityscape, glowing data streams
+2. No real faces or identifiable individuals.
+3. No text, letters, or numbers inside the image.
+4. Style: dramatic, cinematic, photorealistic, magazine cover quality.
+5. Output ONLY the raw image prompt. No explanations, no quotes.`
                 },
                 {
                     role: "user",
-                    content: text.slice(0, 500) // Limit input length
+                    content: text.slice(0, 600)
                 }
             ],
-            temperature: 0.5,
+            temperature: 0.6,
         });
 
         const rawPrompt = promptCompletion.choices[0].message.content?.trim() ?? '';
-        // Ensure it always starts with a safe prefix
-        const imagePrompt = rawPrompt.startsWith('A safe')
-            ? rawPrompt
-            : `A safe, neutral, photorealistic editorial illustration of ${rawPrompt}`;
+        const imagePrompt = rawPrompt || 'Dramatic cinematic editorial illustration of two abstract national flags facing each other across a dark divide, symbolic geopolitical tension, magazine cover style';
 
         if (!imagePrompt) {
             return NextResponse.json({ error: 'Failed to generate an image prompt.' }, { status: 500 });
