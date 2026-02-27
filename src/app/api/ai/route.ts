@@ -25,6 +25,9 @@ export async function POST(req: Request) {
             case 'summarize':
                 systemPrompt += " 제공된 텍스트의 전체 내용을 독자가 가장 흥미로워할 만한 핵심만 추려 2문장의 간결한 하나의 단락으로 요약하세요. 불릿 포인트나 기호 없이 깔끔하게 줄글로만 작성해야 하며, 서술어는 존댓말('~습니다')이 아닌 평어('~다', '~함')로 끝맺으세요.";
                 break;
+            case 'extract_keywords':
+                systemPrompt += " 제공된 글을 분석하여, 이 글에 가장 잘 어울리는 고화질 스톡 사진을 검색하기 위한 핵심 영어 검색어(Search Query) 1개를 추출해 주세요. (예: 'technology', 'business handshake', 'empty coffee cup', 'seoul city', 'financial graph' 등). 특수기호나 따옴표 없이 오직 짧은 영어 검색어 단어 한두 개만 텍스트로 깔끔하게 응답하세요.";
+                break;
             case 'search_data':
                 systemPrompt += " 제공된 텍스트의 맥락에 어울리는 구체적인 최신 통계 데이터나 객관적인 사실 1~2가지를 덧붙여서 글을 더욱 풍부하게 만들어주세요.";
                 break;

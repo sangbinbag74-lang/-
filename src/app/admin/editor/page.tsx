@@ -138,21 +138,67 @@ function EditorContent() {
                 const end = textarea.selectionEnd;
                 const newContent = content.substring(0, start) + imageMarkdown + content.substring(end);
                 setContent(newContent);
-
+                // Move cursor
                 setTimeout(() => {
+                    textarea.selectionStart = textarea.selectionEnd = start + imageMarkdown.length;
                     textarea.focus();
-                    textarea.setSelectionRange(start + imageMarkdown.length, start + imageMarkdown.length);
                 }, 0);
             } else {
                 setContent(prev => prev + imageMarkdown);
             }
-
         } catch (error) {
-            console.error("Error in upload process:", error);
-            alert("이미지 업로드 중 오류가 발생했습니다.");
+            console.error(error);
+            alert("업로드 중 오류가 발생했습니다.");
         } finally {
             setIsUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
+    const [isImageGenerating, setIsImageGenerating] = useState(false);
+
+    const handleGenerateImage = async () => {
+        if (!content || content.length < 20) {
+            alert("AI가 그림을 그릴 수 있도록 본문을 최소 20자 이상 작성해 주세요.");
+            return;
+        }
+
+        setIsImageGenerating(true);
+        try {
+            const res = await fetch('/api/ai/image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: content })
+            });
+            const data = await res.json();
+
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            if (data.url) {
+                const imageMarkdown = `\n![AI 썸네일](${data.url})\n`;
+                const textarea = textareaRef.current;
+
+                if (textarea) {
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const newContent = content.substring(0, start) + imageMarkdown + content.substring(end);
+                    setContent(newContent);
+                    setTimeout(() => {
+                        textarea.selectionStart = textarea.selectionEnd = start + imageMarkdown.length;
+                        textarea.focus();
+                    }, 0);
+                } else {
+                    setContent(prev => imageMarkdown + prev);
+                }
+            }
+        } catch (e) {
+            console.error(e);
+            alert("이미지 생성 중 오류가 발생했습니다.");
+        } finally {
+            setIsImageGenerating(false);
         }
     };
 
@@ -271,8 +317,6 @@ function EditorContent() {
                             <button onClick={() => insertMarkdown('[', '](url)')} className="p-2 shadow-sm rounded-lg hover:bg-accent text-foreground transition-colors" title="링크"><LinkIcon className="w-4 h-4" /></button>
                         </div>
 
-                        <div className="w-px h-6 bg-border mx-1 hidden md:block"></div>
-
                         <input
                             type="file"
                             accept="image/*"
@@ -282,11 +326,20 @@ function EditorContent() {
                         />
                         <button
                             onClick={() => fileInputRef.current?.click()}
-                            disabled={isUploading}
+                            disabled={isUploading || isImageGenerating}
                             className="p-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:bg-accent text-foreground transition-colors disabled:opacity-50"
                         >
                             <ImageIcon className={`w-4 h-4 ${isUploading ? 'animate-pulse' : ''}`} />
-                            {isUploading ? '업로드 중...' : '이미지 추가'}
+                            {isUploading ? '업로드 중...' : '사진 첨부'}
+                        </button>
+
+                        <button
+                            onClick={handleGenerateImage}
+                            disabled={isImageGenerating || isUploading}
+                            className="p-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold hover:bg-brand-mutedBlue/10 text-brand-mutedBlue transition-colors disabled:opacity-50"
+                        >
+                            <Sparkles className={`w-4 h-4 ${isImageGenerating ? 'animate-spin' : ''}`} />
+                            {isImageGenerating ? 'AI가 그리는 중...' : 'AI 그림 생성'}
                         </button>
 
                         <button className="p-2.5 rounded-lg hover:bg-accent text-muted-foreground transition-colors">
