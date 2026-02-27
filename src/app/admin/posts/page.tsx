@@ -1,10 +1,15 @@
 import Link from "next/link";
 import { ArrowLeft, FileText, Pencil, Plus } from "lucide-react";
 import DeletePostButton from "./DeletePostButton";
+import PinButton from "./PinButton";
 import { createClient } from '@/lib/supabase/server';
+import { getSettings } from '@/app/admin/settings/actions';
 
 export default async function AdminPosts() {
     const supabase = createClient();
+    const settings = await getSettings();
+    const featuredPostId = settings.featuredPostId;
+
     const { data: posts } = await supabase
         .from('posts')
         .select('*')
@@ -74,6 +79,10 @@ export default async function AdminPosts() {
                                         {new Date(post.created_at).toLocaleDateString('ko-KR')}
                                     </td>
                                     <td className="px-6 py-4 text-right space-x-2">
+                                        <PinButton
+                                            postId={post.id}
+                                            isFeatured={post.id === featuredPostId}
+                                        />
                                         <Link href={`/admin/editor?id=${post.id}`} className="inline-flex p-2 text-muted-foreground hover:text-brand-mutedBlue hover:bg-accent rounded-lg transition-colors" title="수정">
                                             <Pencil className="w-4 h-4" />
                                         </Link>

@@ -8,13 +8,15 @@ export interface SiteSettings {
     homeGreeting: string;
     homeDescription: string;
     aboutContent: string;
+    featuredPostId: string | null;
 }
 
 const DEFAULT_SETTINGS: SiteSettings = {
     siteName: "포워드 익산",
     homeGreeting: "좋은 아침입니다.",
     homeDescription: "육군 참모차장의 시선으로 그리는 익산의 새로운 비전",
-    aboutContent: "# 포워드 익산 소개\n\n기술, 비즈니스, 디자인 등 다양한 분야의 인사이트를 간결하게 전달하는 1인 레이블 매거진입니다."
+    aboutContent: "# 포워드 익산 소개\n\n기술, 비즈니스, 디자인 등 다양한 분야의 인사이트를 간결하게 전달하는 1인 레이블 매거진입니다.",
+    featuredPostId: null,
 };
 
 export async function getSettings(): Promise<SiteSettings> {
@@ -33,6 +35,7 @@ export async function getSettings(): Promise<SiteSettings> {
                 homeGreeting: parsed.homeGreeting || DEFAULT_SETTINGS.homeGreeting,
                 homeDescription: parsed.homeDescription || DEFAULT_SETTINGS.homeDescription,
                 aboutContent: parsed.aboutContent || DEFAULT_SETTINGS.aboutContent,
+                featuredPostId: parsed.featuredPostId || null,
             };
         } catch (e) {
             console.error('Failed to parse settings JSON', e);
@@ -96,5 +99,36 @@ export async function saveSettings(settings: SiteSettings) {
     revalidatePath('/about')
     revalidatePath('/admin/settings')
 
+    return { success: true }
+}
+
+export async function pinFeaturedPost(postId: string) {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: '인증되지 않은 사용자입니다.' }
+
+    // Merge into existing settings
+    const current = await getSettings();
+    const newSettings = { ...current, featuredPostId: postId };
+    const contentJson = JSON.stringify(newSettings);
+
+    const { data: existing } = await supabase
+        .from('posts').select('id').eq('slug', 'system-settings').maybeSingle()
+
+    if (existing) {
+        await supabase.from('posts').update({ content: contentJson }).eq('id', existing.id);
+    } else {
+        await supabase.from('posts').insert({
+            title: 'System Settings (Do Not Delete)',
+            slug: 'system-settings',
+            content: contentJson,
+            summary: 'Contains site settings JSON',
+            status: 'draft',
+            author: user.email
+        });
+    }
+
+    revalidatePath('/')
+    revalidatePath('/admin/posts')
     return { success: true }
 }

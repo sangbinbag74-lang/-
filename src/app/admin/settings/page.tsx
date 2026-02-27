@@ -10,7 +10,8 @@ export default function AdminSettings() {
         siteName: "",
         homeGreeting: "",
         homeDescription: "",
-        aboutContent: ""
+        aboutContent: "",
+        featuredPostId: null
     });
     const [isLoading, setIsLoading] = useState(true);
     const [isPending, startTransition] = useTransition();

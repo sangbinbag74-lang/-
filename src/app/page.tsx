@@ -19,9 +19,15 @@ export default async function Home() {
   const shorts = rawPosts.filter(p => p.slug?.startsWith('short-')).slice(0, 5);
   const articles = rawPosts.filter(p => !p.slug?.startsWith('short-'));
 
-  const mainPost = articles[0];
-  const standardPost1 = articles[1];
-  const standardPost2 = articles[2];
+  // Use pinned featured post if set, otherwise default to latest article
+  const featuredPostId = settings.featuredPostId;
+  const featuredPost = featuredPostId ? articles.find(p => p.id === featuredPostId) : null;
+  const mainPost = featuredPost || articles[0];
+
+  // remaining articles excluding what's in hero
+  const otherArticles = articles.filter(p => p.id !== mainPost?.id);
+  const standardPost1 = otherArticles[0];
+  const standardPost2 = otherArticles[1];
 
   const getExcerpt = (post: { summary?: string; content?: string }, length: number) => {
     const text = post.summary || post.content || '';
