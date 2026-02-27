@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Search, Tag, ArrowRight } from 'lucide-react';
+import { Search, ArrowRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function ArchivePage() {
