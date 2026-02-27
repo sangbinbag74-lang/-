@@ -44,7 +44,11 @@ export async function POST(req: Request) {
                 systemPrompt += " 이 글의 의도를 파악하여 문맥을 매끄럽게 포맷팅하고 단락을 세련되게 구조화하세요.";
         }
 
-        const config: any = {
+        const config: {
+            systemInstruction: string;
+            temperature: number;
+            tools?: Array<{ googleSearch: object }>;
+        } = {
             systemInstruction: systemPrompt,
             temperature: 0.7,
         };
