@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function savePost(data: { id?: string; title: string; content: string; summary?: string; status: 'draft' | 'published' }) {
+export async function savePost(data: { id?: string; title: string; content: string; summary?: string; status: 'draft' | 'published'; category?: 'article' | 'short' }) {
     const supabase = createClient()
 
     // 1. Check if authenticated
@@ -46,9 +46,12 @@ export async function savePost(data: { id?: string; title: string; content: stri
         }
     } else {
         // Insert new post
-        const slug = data.title
+        const slugBase = data.title
             ? data.title.toLowerCase().replace(/[^a-zA-Z0-9가-힣]+/g, '-').replace(/(^-|-$)+/g, '') + '-' + Date.now()
             : `draft-${Date.now()}`
+
+        const prefix = data.category === 'short' ? 'short-' : 'article-';
+        const slug = prefix + slugBase;
 
         const { data: newRow, error } = await supabase
             .from('posts')

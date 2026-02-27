@@ -15,6 +15,7 @@ function EditorContent() {
     const [title, setTitle] = useState("");
     const [summary, setSummary] = useState("");
     const [content, setContent] = useState("");
+    const [category, setCategory] = useState<'article' | 'short'>('article');
     const [suggestedTitles, setSuggestedTitles] = useState<string[]>([]);
     const [isAiProcessing, setIsAiProcessing] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
@@ -30,6 +31,11 @@ function EditorContent() {
                     setTitle(data.title || "");
                     setSummary(data.summary || "");
                     setContent(data.content || "");
+                    if (data.slug?.startsWith('short-')) {
+                        setCategory('short');
+                    } else {
+                        setCategory('article');
+                    }
                 }
             };
             fetchPost();
@@ -40,7 +46,7 @@ function EditorContent() {
         if (!title && !content) return;
 
         startTransition(async () => {
-            const result = await savePost({ id: postId || undefined, title, content, summary, status });
+            const result = await savePost({ id: postId || undefined, title, content, summary, status, category });
             if (result?.error) {
                 alert(result.error);
             } else if (result?.success) {
@@ -180,8 +186,23 @@ function EditorContent() {
                     <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
                     대시보드로 돌아가기
                 </Link>
-                <div className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground font-medium mr-2">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center bg-accent rounded-lg p-1">
+                        <button
+                            onClick={() => setCategory('article')}
+                            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${category === 'article' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                        >
+                            기사 (Insight)
+                        </button>
+                        <button
+                            onClick={() => setCategory('short')}
+                            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${category === 'short' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                        >
+                            단상 (Short)
+                        </button>
+                    </div>
+
+                    <span className="text-xs text-muted-foreground font-medium hidden md:block">
                         {isPending ? '저장 중...' : '자동 저장 활성화됨'}
                     </span>
                     <button className="p-2 border border-border/60 rounded-lg text-muted-foreground hover:bg-accent transition-colors" aria-label="미리보기">
