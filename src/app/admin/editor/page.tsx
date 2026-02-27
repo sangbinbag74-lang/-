@@ -77,7 +77,15 @@ function EditorContent() {
                 body: JSON.stringify({ text: content, mode })
             });
             const data = await res.json();
-            if (data.result) setContent(data.result);
+            if (data.result) {
+                if (mode === 'suggest_title') {
+                    setContent(prev => prev + '\n\n---\n[AI 추천 제목]\n\n' + data.result);
+                } else if (mode === 'summarize') {
+                    setContent(prev => '[AI 3줄 요약]\n' + data.result + '\n\n---\n\n' + prev);
+                } else {
+                    setContent(data.result);
+                }
+            }
         } catch (e) {
             console.error(e);
         } finally {
