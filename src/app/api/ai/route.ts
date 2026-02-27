@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { GoogleGenAI } from '@google/genai';
 
 export async function POST(req: Request) {
     try {
@@ -8,10 +9,12 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Text is required' }, { status: 400 });
         }
 
-        const apiKey = process.env.OPENAI_API_KEY;
+        const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
-            return NextResponse.json({ error: 'OpenAI API Error: API 키가 설정되지 않았습니다.' }, { status: 500 });
+            return NextResponse.json({ error: 'Gemini API Error: API 키가 설정되지 않았습니다. .env에 GEMINI_API_KEY를 추가해주세요.' }, { status: 500 });
         }
+
+        const ai = new GoogleGenAI({ apiKey });
 
         let systemPrompt = "당신은 전문적이고 유능한 수석 에디터입니다.";
 
@@ -41,36 +44,28 @@ export async function POST(req: Request) {
                 systemPrompt += " 이 글의 의도를 파악하여 문맥을 매끄럽게 포맷팅하고 단락을 세련되게 구조화하세요.";
         }
 
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-                model: "gpt-4o-mini",
-                messages: [
-                    { role: "system", content: systemPrompt },
-                    { role: "user", content: text }
-                ],
-                temperature: 0.7,
-                max_tokens: 1500,
-            })
-        });
+        const config: any = {
+            systemInstruction: systemPrompt,
+            temperature: 0.7,
+        };
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('OpenAI Error Details:', errorData);
-            throw new Error(errorData.error?.message || 'Failed to generate content');
+        // 인터넷 검색(Grounding) 허용 모드: 기사 생성, 통계 검색
+        if (mode === 'generate_article' || mode === 'search_data') {
+            config.tools = [{ googleSearch: {} }];
         }
 
-        const data = await response.json();
-        const result = data.choices[0].message.content;
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: text,
+            config: config
+        });
+
+        const result = response.text;
 
         return NextResponse.json({ result });
 
     } catch (error) {
-        console.error('OpenAI API error:', error);
+        console.error('Gemini API error:', error);
         const errMessage = error instanceof Error ? error.message : 'Failed to process AI request';
         return NextResponse.json({ error: errMessage }, { status: 500 });
     }
