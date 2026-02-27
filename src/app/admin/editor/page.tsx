@@ -14,6 +14,7 @@ function EditorContent() {
 
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
+    const [suggestedTitles, setSuggestedTitles] = useState<string[]>([]);
     const [isAiProcessing, setIsAiProcessing] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [isPending, startTransition] = useTransition();
@@ -79,7 +80,11 @@ function EditorContent() {
             const data = await res.json();
             if (data.result) {
                 if (mode === 'suggest_title') {
-                    setContent(prev => prev + '\n\n---\n[AI 추천 제목]\n\n' + data.result);
+                    const titles = data.result
+                        .split('\n')
+                        .map((line: string) => line.trim())
+                        .filter((line: string) => line.length > 0);
+                    setSuggestedTitles(titles);
                 } else if (mode === 'summarize') {
                     setContent(prev => '[AI 3줄 요약]\n' + data.result + '\n\n---\n\n' + prev);
                 } else {
@@ -233,6 +238,33 @@ function EditorContent() {
 
                 {/* AI Assistant Side Panel */}
                 <div className="w-full lg:w-80 flex flex-col gap-6 shrink-0 border-l border-border/40 pl-0 lg:pl-8">
+
+                    {/* AI Suggested Titles */}
+                    {suggestedTitles.length > 0 && (
+                        <div className="bg-brand-mutedBlue/10 border border-brand-mutedBlue/30 rounded-[1.5rem] p-6 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Sparkles className="h-5 w-5 text-brand-deepNavy dark:text-brand-mutedBlue" />
+                                <h3 className="font-bold text-foreground">AI 추천 제목</h3>
+                            </div>
+                            <div className="space-y-2">
+                                {suggestedTitles.map((t, idx) => {
+                                    const cleanTitle = t.replace(/^\d+\.\s*/, '').replace(/["'*]/g, '');
+                                    return (
+                                        <button
+                                            key={idx}
+                                            onClick={() => { setTitle(cleanTitle); setSuggestedTitles([]); }}
+                                            className="w-full text-left p-3 text-sm font-medium rounded-xl bg-card hover:bg-accent border border-border/50 hover:border-brand-mutedBlue/30 transition-all text-foreground shadow-sm"
+                                        >
+                                            {cleanTitle}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <button onClick={() => setSuggestedTitles([])} className="w-full mt-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors">
+                                닫기
+                            </button>
+                        </div>
+                    )}
 
                     {/* Tone & Style Adjustment */}
                     <div className="bg-gradient-to-br from-brand-mutedBlue/5 to-transparent border border-brand-mutedBlue/20 rounded-[1.5rem] p-6 shadow-sm">
