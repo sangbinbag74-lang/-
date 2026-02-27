@@ -59,10 +59,11 @@ export async function POST(req: Request) {
             promptUsed: imagePrompt
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : '이미지를 생성하는 동안 오류가 발생했습니다. DALL-E 3 크레딧이 부족할 수 있습니다.';
         console.error('AI Image Gen Error:', error);
         return NextResponse.json({
-            error: error.message || '이미지를 생성하는 동안 오류가 발생했습니다. DALL-E 3 크레딧이 부족할 수 있습니다.'
+            error: message
         }, { status: 500 });
     }
 }
