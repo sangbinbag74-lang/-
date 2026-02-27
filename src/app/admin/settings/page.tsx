@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Settings as SettingsIcon, Save, User, Globe, Bell, Shield } from "lucide-react";
+import { ArrowLeft, Settings as SettingsIcon, Save, Globe } from "lucide-react";
 import { getSettings, saveSettings, SiteSettings } from "./actions";
 
 export default function AdminSettings() {
@@ -74,15 +74,6 @@ export default function AdminSettings() {
                 <div className="w-full lg:w-64 shrink-0 flex flex-col gap-2">
                     <button className="flex items-center gap-3 px-4 py-3 rounded-xl bg-accent text-brand-mutedBlue font-semibold text-sm transition-colors text-left">
                         <Globe className="w-4 h-4" /> 사이트 일반
-                    </button>
-                    <button className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent text-foreground font-medium text-sm transition-colors text-left">
-                        <User className="w-4 h-4 text-muted-foreground" /> 내 프로필
-                    </button>
-                    <button className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent text-foreground font-medium text-sm transition-colors text-left">
-                        <Shield className="w-4 h-4 text-muted-foreground" /> 보안 및 인증
-                    </button>
-                    <button className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent text-foreground font-medium text-sm transition-colors text-left">
-                        <Bell className="w-4 h-4 text-muted-foreground" /> 알림 설정
                     </button>
                 </div>
 
