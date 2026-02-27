@@ -22,17 +22,27 @@ export async function POST(req: Request) {
             messages: [
                 {
                     role: "system",
-                    content: "You are an expert prompt engineer for DALL-E 3. Read the provided Korean text and create a single, highly descriptive English prompt (max 50 words) to generate a realistic, high-quality, professional editorial/journalistic illustration or photo that captures the essence of the text. Do not include any text, letters, or words inside the image itself. Just the prompt."
+                    content: `You are an expert prompt engineer for DALL-E 3. Read the provided Korean text and write a single English image prompt (max 40 words) for a safe, clean, professional editorial illustration.
+Rules:
+- Describe only peaceful, positive, neutral scenes such as landscapes, objects, workplaces, cityscapes, or abstract concepts.
+- Never include people's faces, identifiable individuals, weapons, violence, politics, or anything controversial.
+- Do NOT include any text, letters, or words in the described image.
+- Start the prompt with: "A safe, neutral, photorealistic editorial illustration of"
+- Output only the prompt text, nothing else.`
                 },
                 {
                     role: "user",
-                    content: text
+                    content: text.slice(0, 500) // Limit input length
                 }
             ],
-            temperature: 0.7,
+            temperature: 0.5,
         });
 
-        const imagePrompt = promptCompletion.choices[0].message.content;
+        const rawPrompt = promptCompletion.choices[0].message.content?.trim() ?? '';
+        // Ensure it always starts with a safe prefix
+        const imagePrompt = rawPrompt.startsWith('A safe')
+            ? rawPrompt
+            : `A safe, neutral, photorealistic editorial illustration of ${rawPrompt}`;
 
         if (!imagePrompt) {
             return NextResponse.json({ error: 'Failed to generate an image prompt.' }, { status: 500 });
