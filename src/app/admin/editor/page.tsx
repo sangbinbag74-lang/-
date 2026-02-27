@@ -3,7 +3,7 @@
 import { useState, useTransition, useRef, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Mic, Sparkles, Send, Save, Eye, MoreHorizontal, ImageIcon } from "lucide-react";
+import { ArrowLeft, Sparkles, Send, Save, Eye, MoreHorizontal, ImageIcon } from "lucide-react";
 import { savePost } from "./actions";
 import { supabase } from '@/lib/supabase/client';
 
@@ -14,7 +14,6 @@ function EditorContent() {
 
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
-    const [isRecording, setIsRecording] = useState(false);
     const [isAiProcessing, setIsAiProcessing] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [isPending, startTransition] = useTransition();
@@ -50,10 +49,6 @@ function EditorContent() {
                 }
             }
         });
-    };
-
-    const toggleRecording = () => {
-        setIsRecording(!isRecording);
     };
 
     const handleAiAssist = async () => {
@@ -187,17 +182,6 @@ function EditorContent() {
                     />
 
                     <div className="flex items-center gap-2 mb-6 p-2 bg-card border border-border/50 rounded-xl shadow-sm w-fit">
-                        <button
-                            onClick={toggleRecording}
-                            className={`p-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold transition-colors ${isRecording
-                                ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20'
-                                : 'hover:bg-accent text-foreground'
-                                }`}
-                        >
-                            <Mic className={`w-4 h-4 ${isRecording ? 'animate-pulse' : ''}`} />
-                            {isRecording ? '듣는 중...' : '음성 입력 (STT)'}
-                        </button>
-                        <div className="w-px h-6 bg-border mx-1"></div>
                         <button
                             onClick={handleAiAssist}
                             disabled={isAiProcessing || content.length === 0}
