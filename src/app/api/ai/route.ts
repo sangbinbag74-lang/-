@@ -23,7 +23,7 @@ export async function POST(req: Request) {
                 systemPrompt += " 제공된 텍스트를 깊이 있고 신뢰감 있는 저널리즘(기사) 어조로 변경하세요.";
                 break;
             case 'summarize':
-                systemPrompt += " 제공된 텍스트의 전체 내용을 독자가 가장 흥미로워할 만한 핵심만 추려 2문장의 간결한 하나의 단락으로 요약하세요. 불릿 포인트나 기호 없이 깔끔하게 줄글로만 작성해야 하며, 서술어는 존댓말('~습니다')이 아닌 평어('~다', '~함')로 끝맺으세요.";
+                systemPrompt += " 제공된 뉴스 기사를 1~2문장으로 극히 간결하게 요약하세요. 사실(fact)만 담아 신문 리드(lead) 문장처럼 객관적으로 써야 하며, 분석·의견·평가는 절대 넣지 마세요. 불릿 포인트 없이 줄글로만 작성하고, 서술어는 반드시 정중한 격식체('~했습니다', '~됩니다')로 끝맺으세요.";
                 break;
             case 'extract_keywords':
                 systemPrompt += " 제공된 글을 분석하여, 이 글에 가장 잘 어울리는 고화질 스톡 사진을 검색하기 위한 핵심 영어 검색어(Search Query) 1개를 추출해 주세요. (예: 'technology', 'business handshake', 'empty coffee cup', 'seoul city', 'financial graph' 등). 특수기호나 따옴표 없이 오직 짧은 영어 검색어 단어 한두 개만 텍스트로 깔끔하게 응답하세요.";
