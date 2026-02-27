@@ -13,8 +13,14 @@ export async function savePost(data: { id?: string; title: string; content: stri
     }
 
     // 2. Simple AI Summary mock
-    const plainText = data.content.replace(/!\[.*?\]\(.*?\)/g, '').trim()
-    const summary = plainText.substring(0, 100) + (plainText.length > 100 ? '...' : '')
+    // 마크다운 양식(이미지, 기호, 줄바꿈)을 제거하여 깔끔한 평문으로 요약본 생성
+    const plainText = data.content
+        .replace(/!\[.*?\]\(.*?\)/g, '') // 이미지 제거
+        .replace(/\[(.*?)\]\(.*?\)/g, '$1') // 링크는 링크 텍스트만 남김
+        .replace(/[#*`~>]/g, '') // 불필요한 마크다운 기호 제거
+        .replace(/\n+/g, ' ') // 줄바꿈을 공백으로 치환
+        .trim();
+    const summary = plainText.substring(0, 100) + (plainText.length > 100 ? '...' : '');
 
     let resultId = data.id;
 

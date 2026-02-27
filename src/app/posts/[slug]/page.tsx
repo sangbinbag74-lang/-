@@ -48,7 +48,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
                     <span className="flex items-center"><Clock className="mr-1.5 h-3.5 w-3.5" /> 읽는 시간 {readTime}분</span>
                 </div>
 
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold text-foreground leading-[1.15] tracking-tight text-balance whitespace-pre-line">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-sans font-bold text-foreground leading-[1.3] tracking-normal break-keep whitespace-pre-line">
                     {post.title}
                 </h1>
 
@@ -77,8 +77,11 @@ export default async function PostPage({ params }: { params: { slug: string } })
                             <Sparkles className="h-5 w-5" />
                             <h3 className="font-bold text-lg tracking-tight">AI 요약</h3>
                         </div>
-                        <div className="text-foreground/80 text-lg md:text-xl font-medium leading-relaxed">
-                            {post.summary.replace(/!\[.*?\]\(.*?\)/g, '').replace(/!\[.*/g, '')}
+                        <div className="text-foreground/80 text-base md:text-lg font-medium leading-relaxed line-clamp-3">
+                            {post.summary
+                                .replace(/!\[.*?\]\(.*?\)/g, '')
+                                .replace(/!\[.*/g, '')
+                                .replace(/[#*`~>]/g, '')}
                         </div>
                     </div>
                 </section>
