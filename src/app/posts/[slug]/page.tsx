@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { ArrowLeft, Sparkles, Clock, Calendar } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default async function PostPage({ params }: { params: { slug: string } }) {
     const supabase = createClient();
@@ -83,22 +85,17 @@ export default async function PostPage({ params }: { params: { slug: string } })
             )}
 
             {/* Body Content */}
-            <div className="text-lg md:text-xl text-foreground/90 leading-loose font-sans font-light whitespace-pre-wrap break-words">
-                {post.content.split(/(!\[[^\]]*\]\([^)]+\))/g).map((part: string, index: number) => {
-                    const imgMatch = part.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
-                    if (imgMatch) {
-                        return (
-                            <img
-                                key={index}
-                                src={imgMatch[2]}
-                                alt={imgMatch[1]}
-                                className="w-full h-auto max-h-[70vh] object-contain rounded-2xl shadow-sm my-8 bg-black/5 dark:bg-white/5"
-                                loading="lazy"
-                            />
-                        );
-                    }
-                    return <span key={index}>{part}</span>;
-                })}
+            <div className="prose prose-lg dark:prose-invert prose-brand max-w-none 
+                            prose-headings:font-serif prose-headings:font-bold prose-headings:text-foreground
+                            prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:pb-2 border-border/40
+                            prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4
+                            prose-p:leading-relaxed prose-p:text-foreground/90 prose-p:mb-6
+                            prose-strong:text-foreground prose-strong:font-bold
+                            prose-li:text-foreground/90 
+                            prose-img:rounded-2xl prose-img:shadow-sm prose-img:my-8 prose-img:w-full prose-img:max-h-[70vh] prose-img:object-contain prose-img:bg-black/5 dark:prose-img:bg-white/5">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {post.content}
+                </ReactMarkdown>
             </div>
 
         </article>

@@ -3,7 +3,7 @@
 import { useState, useTransition, useRef, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Sparkles, Send, Save, Eye, MoreHorizontal, ImageIcon } from "lucide-react";
+import { ArrowLeft, Sparkles, Send, Save, Eye, MoreHorizontal, ImageIcon, Heading2, Heading3, Bold, Italic, Link as LinkIcon, List, Quote } from "lucide-react";
 import { savePost } from "./actions";
 import { supabase } from '@/lib/supabase/client';
 
@@ -148,6 +148,27 @@ function EditorContent() {
         }
     };
 
+    const insertMarkdown = (prefix: string, suffix: string = '') => {
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = content;
+        const selectedText = text.substring(start, end);
+
+        const newContent = text.substring(0, start) + prefix + selectedText + suffix + text.substring(end);
+        setContent(newContent);
+
+        setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(
+                start + prefix.length,
+                start + prefix.length + selectedText.length
+            );
+        }, 0);
+    };
+
     return (
         <div className="container mx-auto max-w-screen-xl px-4 lg:px-8 py-8 animate-in fade-in slide-in-from-bottom-4 duration-700 min-h-[calc(100vh-140px)] flex flex-col">
 
@@ -205,6 +226,21 @@ function EditorContent() {
                         </button>
 
                         <div className="w-px h-6 bg-border mx-1"></div>
+
+                        {/* Formatting Toolbar */}
+                        <div className="flex items-center gap-0.5">
+                            <button onClick={() => insertMarkdown('## ', '')} className="p-2 shadow-sm rounded-lg hover:bg-accent text-foreground transition-colors" title="소제목 1"><Heading2 className="w-4 h-4" /></button>
+                            <button onClick={() => insertMarkdown('### ', '')} className="p-2 shadow-sm rounded-lg hover:bg-accent text-foreground transition-colors" title="소제목 2"><Heading3 className="w-4 h-4" /></button>
+                            <div className="w-px h-4 bg-border mx-1"></div>
+                            <button onClick={() => insertMarkdown('**', '**')} className="p-2 shadow-sm rounded-lg hover:bg-accent text-foreground transition-colors" title="굵게"><Bold className="w-4 h-4" /></button>
+                            <button onClick={() => insertMarkdown('_', '_')} className="p-2 shadow-sm rounded-lg hover:bg-accent text-foreground transition-colors" title="기울임"><Italic className="w-4 h-4" /></button>
+                            <div className="w-px h-4 bg-border mx-1"></div>
+                            <button onClick={() => insertMarkdown('- ', '')} className="p-2 shadow-sm rounded-lg hover:bg-accent text-foreground transition-colors" title="목록"><List className="w-4 h-4" /></button>
+                            <button onClick={() => insertMarkdown('> ', '')} className="p-2 shadow-sm rounded-lg hover:bg-accent text-foreground transition-colors" title="인용구"><Quote className="w-4 h-4" /></button>
+                            <button onClick={() => insertMarkdown('[', '](url)')} className="p-2 shadow-sm rounded-lg hover:bg-accent text-foreground transition-colors" title="링크"><LinkIcon className="w-4 h-4" /></button>
+                        </div>
+
+                        <div className="w-px h-6 bg-border mx-1 hidden md:block"></div>
 
                         <input
                             type="file"
