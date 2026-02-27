@@ -18,7 +18,13 @@ export default async function Home() {
 
   const getExcerpt = (post: { summary?: string; content?: string }, length: number) => {
     const text = post.summary || post.content || '';
-    return text.replace(/!\[.*?\]\(.*?\)/g, '').replace(/!\[.*/g, '').substring(0, length);
+    return text
+      .replace(/!\[.*?\]\(.*?\)/g, '')
+      .replace(/\[(.*?)\]\(.*?\)/g, '$1')
+      .replace(/!\[.*/g, '')
+      .replace(/[#*`~>]/g, '')
+      .trim()
+      .substring(0, length);
   };
 
   const getFirstImage = (content?: string) => {
