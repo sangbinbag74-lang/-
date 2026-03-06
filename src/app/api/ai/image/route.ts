@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(req: Request) {
     try {
@@ -12,6 +13,12 @@ export async function POST(req: Request) {
         const apiKey = process.env.OPENAI_API_KEY;
         if (!apiKey) {
             return NextResponse.json({ error: 'OpenAI API Error: API 키가 설정되지 않았습니다. .env에 OPENAI_API_KEY를 추가해주세요.' }, { status: 500 });
+        }
+
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        if (!supabaseUrl || !supabaseKey) {
+            return NextResponse.json({ error: 'Supabase 환경변수가 설정되지 않았습니다.' }, { status: 500 });
         }
 
         const openai = new OpenAI({ apiKey });
@@ -62,14 +69,36 @@ CRITICAL RULES:
             response_format: "url",
         });
 
-        const imageUrl = imageResponse.data?.[0]?.url;
+        const tempUrl = imageResponse.data?.[0]?.url;
 
-        if (!imageUrl) {
+        if (!tempUrl) {
             return NextResponse.json({ error: 'OpenAI returned an empty image URL.' }, { status: 500 });
         }
 
+        // 3. Download the image from OpenAI's temp URL and re-upload to Supabase Storage
+        //    This is necessary because DALL-E URLs expire after ~1 hour.
+        const imageBlob = await fetch(tempUrl).then(r => r.blob());
+        const fileName = `ai-generated-${Date.now()}.webp`;
+
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        const { error: uploadError } = await supabase.storage
+            .from('post-images')
+            .upload(fileName, imageBlob, {
+                contentType: 'image/webp',
+                upsert: false,
+            });
+
+        if (uploadError) {
+            console.error('Supabase upload error:', uploadError);
+            // Fallback: return temp URL if upload fails (will expire but better than nothing)
+            return NextResponse.json({ url: tempUrl, promptUsed: imagePrompt, warning: 'Supabase 업로드 실패, 임시 URL 반환됨' });
+        }
+
+        const { data: publicUrlData } = supabase.storage.from('post-images').getPublicUrl(fileName);
+        const permanentUrl = publicUrlData.publicUrl;
+
         return NextResponse.json({
-            url: imageUrl,
+            url: permanentUrl,
             promptUsed: imagePrompt
         });
 
