@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>HORIZON 라이브 맵</title>
+<meta name="description" content="실시간 국제 이슈 지도 — 뉴스, 지진, 자연재해, 항공기, 환율을 한 화면에서.">
+<meta name="theme-color" content="#0a0f17">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="vendor/maplibre-gl.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="bar">
+  <a class="logo" href="#map" aria-label="HORIZON 라이브 맵 홈"><span class="logo-mark"></span>HORIZON<em>LIVE</em></a>
+  <nav class="nav" aria-label="주 메뉴">
+    <a href="#map" data-view="map" aria-current="page">지도</a>
+    <a href="#markets" data-view="markets">마켓</a>
+    <a href="#quiz" data-view="quiz">퀴즈</a>
+    <a href="#desk" data-view="desk">기자단</a>
+  </nav>
+  <div class="clocks mono" aria-label="현재 시각"><span id="cUtc">UTC --:--</span><span id="cKst">KST --:--</span></div>
+</header>
+
+<div class="ticker" id="tickerBar">
+  <b><i class="live-dot"></i>속보 4H</b>
+  <div class="ticker-track"><div class="ticker-run" id="ticker"></div></div>
+</div>
+
+<main id="views">
+  <!-- 지도 -->
+  <section class="view view-map" id="v-map" data-view="map">
+    <div id="map" aria-label="실시간 이슈 지도"></div>
+
+    <aside class="panel left" id="layersPanel" aria-label="레이어">
+      <div class="panel-h"><h2>레이어</h2><button class="icon-btn only-m" data-close="layersPanel" aria-label="닫기">✕</button></div>
+      <div class="timewin" role="group" aria-label="시간 범위">
+        <button data-win="1">1H</button><button data-win="6">6H</button><button data-win="24" aria-pressed="true">24H</button><button data-win="168">7D</button>
+      </div>
+      <ul class="layers" id="layers"></ul>
+      <p class="src-note">출처: GDELT · USGS · NASA EONET · OpenSky · Frankfurter. 데이터 연결이 안 될 때는 <span class="tag-ex">예시</span> 표시 기사로 채웁니다.</p>
+    </aside>
+
+    <aside class="panel right" id="feedPanel" aria-label="기사 피드">
+      <div class="panel-h">
+        <div class="tabs" role="tablist">
+          <button role="tab" aria-selected="true" data-tab="latest">속보</button>
+          <button role="tab" aria-selected="false" data-tab="rank">지역 랭킹</button>
+        </div>
+        <button class="icon-btn only-m" data-close="feedPanel" aria-label="닫기">✕</button>
+      </div>
+      <input class="search" id="search" type="search" placeholder="키워드·지역 검색" autocomplete="off">
+      <div class="feed" id="feed"></div>
+    </aside>
+
+    <div class="stats mono" id="stats"></div>
+    <div class="m-dock only-m">
+      <button data-open="layersPanel">레이어</button>
+      <button data-open="feedPanel">피드 <span id="feedCount" class="mono"></span></button>
+    </div>
+    <article class="card" id="card" hidden></article>
+  </section>
+
+  <!-- 마켓 -->
+  <section class="view page" id="v-markets" data-view="markets" hidden>
+    <div class="page-in">
+      <header class="page-h"><p class="eyebrow">GLOBAL MARKETS</p><h1>환율 대시보드</h1><p class="sub">유럽중앙은행 기준환율(Frankfurter) 30일 추이. 영업일 기준으로 하루 한 번 갱신됩니다.</p></header>
+      <div class="fx" id="fx"></div>
+      <p class="sub" id="fxNote"></p>
+    </div>
+  </section>
+
+  <!-- 퀴즈 -->
+  <section class="view page" id="v-quiz" data-view="quiz" hidden>
+    <div class="page-in narrow">
+      <header class="page-h"><p class="eyebrow">DAILY QUIZ</p><h1>오늘의 시사 퀴즈</h1><p class="sub">정답마다 XP, 연속 정답이면 보너스. 기록은 이 브라우저에 저장됩니다.</p></header>
+      <div class="quiz-stat" id="qStat"></div>
+      <div class="quiz" id="quiz"></div>
+      <h2 class="h2">리더보드</h2>
+      <ol class="board" id="board"></ol>
+    </div>
+  </section>
+
+  <!-- 기자단 -->
+  <section class="view page" id="v-desk" data-view="desk" hidden>
+    <div class="page-in desk-grid">
+      <header class="page-h"><p class="eyebrow">REPORTER DESK</p><h1>기사 작성·발행</h1><p class="sub">위치를 지도에서 찍고 발행하면 즉시 라이브 맵과 속보 띠에 올라갑니다.</p></header>
+      <form class="form" id="deskForm" autocomplete="off">
+        <label>제목<input id="dTitle" required maxlength="90" placeholder="예: 발트해 해저 케이블 손상, 공동 조사 착수"></label>
+        <div class="row2">
+          <label>분류<select id="dCat"></select></label>
+          <label>긴급도<select id="dUrg"><option value="0">일반</option><option value="1">속보</option></select></label>
+        </div>
+        <label>위치
+          <div class="loc"><input id="dLoc" readonly placeholder="지도에서 선택" class="mono"><button type="button" class="btn ghost" id="pickLoc">지도에서 찍기</button></div>
+        </label>
+        <label>지역명<input id="dPlace" required maxlength="40" placeholder="예: 헬싱키"></label>
+        <label>본문<textarea id="dBody" required rows="7"></textarea></label>
+        <label>출처 링크 (선택)<input id="dUrl" type="url" placeholder="https://"></label>
+        <div class="actions"><button class="btn" type="submit">발행</button><span class="sub" id="dMsg"></span></div>
+      </form>
+      <div class="mine"><h2 class="h2">내가 발행한 기사</h2><ul id="mine" class="mine-list"></ul></div>
+    </div>
+  </section>
+</main>
+
+<div class="pickbar" id="pickbar" hidden>지도를 눌러 기사 위치를 선택하세요 <button class="btn ghost" id="pickCancel">취소</button></div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="vendor/maplibre-gl.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
